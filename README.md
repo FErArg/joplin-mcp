@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.4-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.5-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,9 +8,27 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
+**v1.5 - 12 MCP Tools for Complete Joplin Management:**
+
+### Read-Only Tools
 - **search_notes**: Search notes by keyword across all notebooks
 - **read_note**: Read full note content in Markdown format
 - **list_notebooks**: List all notebooks (folders) in Joplin
+- **list_tags**: List all tags in Joplin
+
+### Notebook Management (New in v1.5)
+- **create_notebook**: Create new notebooks with optional nesting
+- **update_notebook**: Rename existing notebooks
+- **delete_notebook**: Permanently delete notebooks
+
+### Note Management (New in v1.5)
+- **create_note**: Create notes with title, body, and optional tags
+- **update_note**: Update note content or move to different notebook
+- **delete_note**: Permanently delete individual notes
+
+### Tag Management (New in v1.5)
+- **add_tags_to_note**: Add tags to notes (creates if non-existent)
+- **remove_tags_from_note**: Remove tags from notes
 
 ## Installation
 
@@ -151,6 +169,14 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ```
 
 ## Changelog
+
+### v1.5 (2025-04-21)
+- **Major**: Full CRUD operations for notebooks and notes
+- **New**: Create, update, delete notebooks (e.g., "WiKi_LLM")
+- **New**: Create, update, delete notes with Markdown support
+- **New**: Tag management (add, remove, list tags)
+- **Enhanced**: 12 MCP tools (from 3 in v1.4)
+- **Improved**: Better error handling and API coverage
 
 ### v1.4 (2025-04-21)
 - Converted to Linux-only MCP server

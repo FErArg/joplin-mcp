@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5] - 2025-04-21
+
+### Added
+- **Full CRUD Operations for Notebooks**:
+  - `create_notebook(name, parent_id)` - Creates new notebooks with optional nesting
+  - `delete_notebook(notebook_id)` - Permanently deletes notebooks and their contents
+  - `update_notebook(notebook_id, new_name)` - Renames existing notebooks
+  - Enables creation of structured notebook hierarchies like "WiKi_LLM"
+
+- **Full CRUD Operations for Notes**:
+  - `create_note(title, body, notebook_id, tags)` - Creates notes with optional placement and tags
+  - `update_note(note_id, title, body, notebook_id)` - Updates note content or location
+  - `delete_note(note_id)` - Permanently deletes individual notes
+  - Supports Markdown content and tag associations
+
+- **Tag Management System**:
+  - `add_tags_to_note(note_id, tags)` - Adds multiple tags to notes (creates if non-existent)
+  - `remove_tags_from_note(note_id, tags)` - Removes specified tags from notes
+  - `list_tags()` - Displays all tags in Joplin
+  - Automatic tag creation and association handling
+
+- **Enhanced API Infrastructure**:
+  - Refactored `joplin_request()` to support POST, PUT, DELETE operations
+  - Improved error handling with specific HTTP error codes and messages
+  - Better debug logging for all API operations
+  - Maintains backward compatibility with all v1.4 tools
+
+### Changed
+- **Expanded Tool Set**: From 3 tools to 12 tools (300% increase in functionality)
+- **Improved Error Messages**: More descriptive errors for API failures and validation issues
+- **British English Consistency**: All new tool descriptions use British spelling and terminology
+
+### Technical
+- **Code Organisation**: Modular function structure for better maintainability
+- **API Coverage**: Complete coverage of Joplin REST API for folders, notes, and tags
+- **Input Validation**: Schema-based validation for all new tools via MCP protocol
+
 ## [1.4] - 2025-04-21
 
 ### Changed
@@ -139,7 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.4...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.5...HEAD
+[1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5
 [1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
 [1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3
 [1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
