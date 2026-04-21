@@ -425,6 +425,20 @@ install_files() {
     # Create version file
     echo "$VERSION" > "$INSTALL_DIR/VERSION"
     
+    # Verify VERSION file was created correctly
+    if [ -f "$INSTALL_DIR/VERSION" ]; then
+        installed_version=$(cat "$INSTALL_DIR/VERSION" 2>/dev/null || echo "unknown")
+        if [ "$installed_version" = "$VERSION" ]; then
+            success "Version file created: $installed_version"
+        else
+            error "Version file mismatch: expected $VERSION, got $installed_version"
+            exit 1
+        fi
+    else
+        error "Failed to create VERSION file"
+        exit 1
+    fi
+    
     success "Files installed to: $INSTALL_DIR"
 }
 
@@ -558,13 +572,13 @@ test_mcp_tools() {
         tool_count=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('result',{}).get('tools',[])))" 2>/dev/null || echo "?")
         success "Number of tools: $tool_count"
         
-        # Verify v1.8 has 12 tools
-        if [ "$tool_count" = "12" ]; then
-            success "All v1.8 tools present (12 tools)"
+        # Verify v1.8 has 14 tools
+        if [ "$tool_count" = "14" ]; then
+            success "All v1.8 tools present (14 tools)"
         elif [ "$tool_count" = "3" ]; then
-            warning "Only v1.4 tools detected (3 tools). v1.8 has 12 tools."
+            warning "Only v1.4 tools detected (3 tools). v1.8 has 14 tools."
         else
-            warning "Unexpected tool count. Expected 12 for v1.8."
+            warning "Unexpected tool count: $tool_count. Expected 14 for v1.8."
         fi
         
         return 0
