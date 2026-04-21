@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.1-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
 A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
@@ -414,7 +414,18 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 ## License
 
-MIT License - See LICENSE file for details
+**GPL v3 License** - See [LICENSE](LICENSE) file for details
+
+This project is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+## Acknowledgments
+
+This project was developed with the assistance of:
+
+- **[DeepSeek](https://www.deepseek.com/)** - AI model used for code development, architecture design, and documentation
+- **[Kimi](https://kimi.moonshot.cn/)** - AI model used for code review, optimization, and testing
+
+Special thanks to the open-source AI community for making tools like these accessible to developers.
 
 ## Contributing
 
