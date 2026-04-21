@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4] - 2025-04-21
+
+### Changed
+- **Converted to Linux-Only MCP Server**:
+  - Removed macOS detection (`darwin*`) from `install.sh`
+  - Removed Windows detection (`msys`, `cygwin`) from `install.sh`
+  - Eliminated macOS Joplin path (`~/Library/Application Support/Joplin/`)
+  - Updated OS detection to Linux-only with explicit error for unsupported systems
+  - Updated documentation to reflect Linux-only support
+
+### Removed
+- Cross-platform compatibility code for macOS and Windows
+- macOS-specific Joplin configuration paths
+- Windows WSL support references
+
 ## [1.3] - 2025-04-21
 
 ### Changed
@@ -54,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Automated Installer** (`install.sh`) - Complete installation automation with:
-  - OS detection (Linux, macOS, Windows WSL)
+  - OS detection (Linux only)
   - Dependency checking (Python 3.9+, pip, curl)
   - Automatic token detection from Joplin settings
   - Interactive token prompt with validation
@@ -124,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.3...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.4...HEAD
+[1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
 [1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3
 [1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
 [1.1]: https://github.com/ferarg/joplin-mcp/compare/v1.0...v1.1

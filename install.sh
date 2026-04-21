@@ -1,5 +1,5 @@
 #!/bin/bash
-# Joplin MCP Installer v1.3
+# Joplin MCP Installer v1.4
 # Complete installer with validation, backup, and tests
 
 set -e  # Exit on error
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.3"
+VERSION="1.4"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -48,12 +48,11 @@ detect_os() {
     
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        OS="macos"
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-        OS="windows"
     else
         OS="unknown"
+        error "Unsupported operating system detected: $OSTYPE"
+        error "This MCP server is designed for Linux systems only"
+        exit 1
     fi
     
     success "Operating system detected: $OS"
@@ -116,10 +115,6 @@ check_joplin_installed() {
         # Flatpak
         joplin_found=true
         settings_path="$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
-    elif [ -d "$HOME/Library/Application Support/Joplin" ]; then
-        # macOS
-        joplin_found=true
-        settings_path="$HOME/Library/Application Support/Joplin/settings.json"
     fi
     
     if [ "$joplin_found" = true ]; then
@@ -249,7 +244,6 @@ search_joplin_token() {
     local settings_files=(
         "$JOPLIN_CONFIG_DIR/settings.json"
         "$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
-        "$HOME/Library/Application Support/Joplin/settings.json"
     )
     
     for settings_file in "${settings_files[@]}"; do

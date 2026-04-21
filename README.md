@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.3-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.4-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -151,6 +151,11 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ```
 
 ## Changelog
+
+### v1.4 (2025-04-21)
+- Converted to Linux-only MCP server
+- Removed macOS and Windows compatibility code
+- Updated OS detection to Linux-only
 
 ### v1.3 (2025-04-21)
 - Complete translation to British English
