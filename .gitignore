@@ -46,3 +46,6 @@ Thumbs.db
 # MCP config tokens (sensitive)
 .env
 *.env.local
+
+# Large license text files (not the main LICENSE)
+GPLv3-spanish.txt
