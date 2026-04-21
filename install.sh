@@ -1,5 +1,5 @@
 #!/bin/bash
-# Joplin MCP Installer v1.3
+# Joplin MCP Installer v1.5
 # Complete installer with validation, backup, and tests
 
 set -e  # Exit on error
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.3"
+VERSION="1.5"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -48,12 +48,11 @@ detect_os() {
     
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        OS="macos"
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-        OS="windows"
     else
         OS="unknown"
+        error "Unsupported operating system detected: $OSTYPE"
+        error "This MCP server is designed for Linux systems only"
+        exit 1
     fi
     
     success "Operating system detected: $OS"
@@ -116,10 +115,6 @@ check_joplin_installed() {
         # Flatpak
         joplin_found=true
         settings_path="$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
-    elif [ -d "$HOME/Library/Application Support/Joplin" ]; then
-        # macOS
-        joplin_found=true
-        settings_path="$HOME/Library/Application Support/Joplin/settings.json"
     fi
     
     if [ "$joplin_found" = true ]; then
@@ -249,7 +244,6 @@ search_joplin_token() {
     local settings_files=(
         "$JOPLIN_CONFIG_DIR/settings.json"
         "$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
-        "$HOME/Library/Application Support/Joplin/settings.json"
     )
     
     for settings_file in "${settings_files[@]}"; do
@@ -296,6 +290,42 @@ validate_token() {
         return 0
     else
         error "Invalid token or Joplin not responding"
+        return 1
+    fi
+}
+
+check_write_permissions() {
+    local token=$1
+    local port=${JOPLIN_PORT:-41184}
+    
+    log "Checking write permissions..."
+    
+    # Try to create a test notebook
+    local test_name="MCP_Test_$(date +%s)"
+    local response
+    response=$(curl -s -X POST "http://localhost:$port/folders?token=$token" \
+        -H "Content-Type: application/json" \
+        -d "{\"title\":\"$test_name\"}" 2>/dev/null || echo "")
+    
+    if echo "$response" | grep -q '"id"'; then
+        # Successfully created, now delete it
+        local folder_id
+        folder_id=$(echo "$response" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
+        
+        if [ -n "$folder_id" ]; then
+            curl -s -X DELETE "http://localhost:$port/folders/$folder_id?token=$token" > /dev/null 2>&1
+        fi
+        
+        success "Write permissions confirmed - Full v1.5 functionality available"
+        return 0
+    else
+        warning "Write permissions not available - Token may have read-only access"
+        warning "v1.5 features (create, update, delete) will not work"
+        echo ""
+        warning "To enable full functionality:"
+        warning "  1. Check Joplin Web Clipper settings"
+        warning "  2. Ensure token has full API access"
+        echo ""
         return 1
     fi
 }
@@ -356,6 +386,10 @@ get_token() {
     if [ "$confirm" != "y" ]; then
         prompt_for_token
     fi
+    
+    # Check write permissions for v1.5 features
+    echo ""
+    check_write_permissions "$TOKEN"
 }
 
 # ============================================================
@@ -523,6 +557,15 @@ test_mcp_tools() {
         local tool_count
         tool_count=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('result',{}).get('tools',[])))" 2>/dev/null || echo "?")
         success "Number of tools: $tool_count"
+        
+        # Verify v1.5 has 12 tools
+        if [ "$tool_count" = "12" ]; then
+            success "All v1.5 tools present (12 tools)"
+        elif [ "$tool_count" = "3" ]; then
+            warning "Only v1.4 tools detected (3 tools). v1.5 has 12 tools."
+        else
+            warning "Unexpected tool count. Expected 12 for v1.5."
+        fi
         
         return 0
     else
