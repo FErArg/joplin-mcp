@@ -10,12 +10,16 @@ JOPLIN_PORT = os.environ.get("JOPLIN_PORT", "41184")
 BASE_URL = f"http://localhost:{JOPLIN_PORT}"
 
 def joplin_request(endpoint, query_params=None):
+    if not JOPLIN_TOKEN:
+        sys.stderr.write("WARNING: JOPLIN_TOKEN is empty or not set\n")
+    
     if query_params is None:
         query_params = {}
     query_params['token'] = JOPLIN_TOKEN
     
     query_string = urllib.parse.urlencode(query_params)
     url = f"{BASE_URL}/{endpoint}?{query_string}"
+    sys.stderr.write(f"DEBUG: Requesting {BASE_URL}/{endpoint} (token length: {len(JOPLIN_TOKEN) if JOPLIN_TOKEN else 0})\n")
     
     try:
         req = urllib.request.Request(url)
