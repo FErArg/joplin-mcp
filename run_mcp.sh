@@ -1,8 +1,9 @@
 #!/bin/bash
 # Wrapper script para ejecutar el servidor MCP de Joplin con variables de entorno
+# Ubicación preferida: ~/.config/opencode/mcp/joplin-mcp.sh
 
-export JOPLIN_TOKEN="b1fcefce79aa0fb0aa3fc85cc89031a8421302340253b984efd4cfc20d51f7c6ef98ba33f207979f9e677cca4ad361d5328a42940e8598dbe1cae1bd028439be"
+export JOPLIN_TOKEN="REEMPLAZA_CON_TU_TOKEN_DE_WEB_CLIPPER"
 export JOPLIN_PORT="41184"
 
-cd /home/ferarg/Git/joplin-mcp
+cd "$(dirname "$0")"
 exec ./venv/bin/python server.py
