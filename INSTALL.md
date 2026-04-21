@@ -56,7 +56,7 @@ cd joplin-mcp
 The `install.sh` installer automates the entire process:
 
 1. **System verification**
-   - Detects your operating system (Linux, macOS, Windows WSL)
+   - Detects Linux operating system (Linux-only support)
    - Verifies you have Python 3.9+ installed
    - Checks dependencies (pip, curl)
 
