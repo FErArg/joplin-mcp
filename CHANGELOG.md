@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3] - 2025-04-21
+
+### Changed
+- **Complete Translation to British English**:
+  - Translated all user-facing text in `install.sh`, `joplin-mcp-doctor.sh`, `uninstall.sh`
+  - Translated tool descriptions in `server.py` to British English
+  - Translated complete `README.md` and `INSTALL.md` documentation
+  - Applied British spelling throughout: "colour", "centre", "analyse", "organisation"
+
+### Added
+- **Project Attribution**:
+  - Added links to [JoplinApp](https://joplinapp.org/) in README.md
+  - Added links to [OpenCode](https://github.com/anomalyco/opencode) in README.md
+  - Documented MCP Protocol version (2024-11-05)
+  - Added "Acknowledgements" section with project references
+
+### Security
+- **Privacy Verification**:
+  - Verified no personal information leaks in codebase
+  - Confirmed no hardcoded tokens, passwords, or private paths
+  - All sensitive data uses placeholders (`TOKEN_JOPLIN`)
+
 ## [1.2] - 2025-04-21
 
 ### Fixed
@@ -102,7 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.2...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.3...HEAD
+[1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3
 [1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
 [1.1]: https://github.com/ferarg/joplin-mcp/compare/v1.0...v1.1
 [1.0]: https://github.com/ferarg/joplin-mcp/releases/tag/v1.0

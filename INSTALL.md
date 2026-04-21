@@ -1,163 +1,163 @@
-# INSTALL.md - Guía de Instalación de Joplin MCP
+# INSTALL.md - Joplin MCP Installation Guide
 
-Esta guía cubre todos los aspectos de instalación, configuración y desinstalación del Joplin MCP Server.
+This guide covers all aspects of installing, configuring, and uninstalling the Joplin MCP Server.
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación Automática (Recomendada)](#instalación-automática-recomendada)
-- [Instalación Manual](#instalación-manual)
-- [Configuración](#configuración)
+- [Prerequisites](#prerequisites)
+- [Automatic Installation (Recommended)](#automatic-installation-recommended)
+- [Manual Installation](#manual-installation)
+- [Configuration](#configuration)
   - [OpenCode](#opencode)
   - [Claude Desktop](#claude-desktop)
-- [Gestión de la Instalación](#gestión-de-la-instalación)
-- [Desinstalación](#desinstalación)
-- [Solución de Problemas](#solución-de-problemas)
-- [Recuperación de Backup](#recuperación-de-backup)
+- [Installation Management](#installation-management)
+- [Uninstallation](#uninstallation)
+- [Troubleshooting](#troubleshooting)
+- [Backup Recovery](#backup-recovery)
 
 ---
 
-## Requisitos Previos
+## Prerequisites
 
-Antes de instalar, asegúrate de tener:
+Before installing, ensure you have:
 
-- **Python 3.9 o superior**
+- **Python 3.9 or higher**
   ```bash
-  python3 --version  # Debe mostrar 3.9.x o superior
+  python3 --version  # Must show 3.9.x or higher
   ```
 
-- **Joplin Desktop** ejecutándose con Web Clipper habilitado:
-  1. Abre Joplin
-  2. Ve a **Options > Web Clipper**
-  3. Habilita **"Enable Web Clipper"**
-  4. Opcionalmente, copia el token (el instalador puede detectarlo automáticamente)
+- **Joplin Desktop** running with Web Clipper enabled:
+  1. Open Joplin
+  2. Go to **Options > Web Clipper**
+  3. Enable **"Enable Web Clipper"**
+  4. Optionally, copy the token (the installer can detect it automatically)
 
-- **Dependencias del sistema** (normalmente ya instaladas):
-  - `curl` - para validar la conexión con Joplin
-  - `git` - para clonar el repositorio
+- **System dependencies** (normally already installed):
+  - `curl` - for validating the connection with Joplin
+  - `git` - for cloning the repository
 
 ---
 
-## Instalación Automática (Recomendada)
+## Automatic Installation (Recommended)
 
-La forma más fácil y rápida de instalar es usando el instalador automático:
+The easiest and quickest way to install is using the automatic installer:
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/ferarg/joplin-mcp.git
 cd joplin-mcp
 
-# 2. Ejecutar el instalador
+# 2. Run the installer
 ./install.sh
 ```
 
-### ¿Qué hace el instalador?
+### What does the installer do?
 
-El instalador `install.sh` automatiza todo el proceso:
+The `install.sh` installer automates the entire process:
 
-1. **Verificación del sistema**
-   - Detecta tu sistema operativo (Linux, macOS, Windows WSL)
-   - Verifica que tengas Python 3.9+ instalado
-   - Comprueba dependencias (pip, curl)
+1. **System verification**
+   - Detects your operating system (Linux, macOS, Windows WSL)
+   - Verifies you have Python 3.9+ installed
+   - Checks dependencies (pip, curl)
 
-2. **Detección del token de Joplin**
-   - Busca automáticamente tu token en `~/.config/joplin-desktop/settings.json`
-   - Si no lo encuentra, te lo pide interactivamente
-   - Valida que el token funcione antes de continuar
+2. **Joplin token detection**
+   - Automatically searches for your token in `~/.config/joplin-desktop/settings.json`
+   - If not found, prompts you for it interactively
+   - Validates that the token works before continuing
 
-3. **Instalación del entorno**
-   - Crea el directorio `~/.joplin-mcp/`
-   - Crea un entorno virtual Python
-   - Instala todas las dependencias desde `requirements.txt`
-   - Genera el script `run_mcp.sh` con tu token
+3. **Environment installation**
+   - Creates the `~/.joplin-mcp/` directory
+   - Creates a Python virtual environment
+   - Installs all dependencies from `requirements.txt`
+   - Generates the `run_mcp.sh` script with your token
 
-4. **Configuración de OpenCode**
-   - Realiza **backup automático** de `~/.config/opencode/opencode.json`
-   - Añade la configuración del MCP de Joplin
-   - Preserva tu configuración existente
+4. **OpenCode configuration**
+   - Performs **automatic backup** of `~/.config/opencode/opencode.json`
+   - Adds the Joplin MCP configuration
+   - Preserves your existing configuration
 
-5. **Validación**
-   - Prueba que el servidor MCP responde
-   - Verifica que las herramientas están disponibles
-   - Muestra resumen de la instalación
+5. **Validation**
+   - Tests that the MCP server responds
+   - Verifies that the tools are available
+   - Shows installation summary
 
 ---
 
-## Instalación Manual
+## Manual Installation
 
-Si prefieres instalar manualmente o necesitas más control sobre el proceso:
+If you prefer to install manually or need more control over the process:
 
-### Paso 1: Preparar el entorno
+### Step 1: Prepare the environment
 
 ```bash
-# Crear directorio de instalación
+# Create installation directory
 mkdir -p ~/.joplin-mcp
 cd ~/.joplin-mcp
 
-# Copiar archivos necesarios desde el repositorio clonado
-cp /ruta/al/repo/joplin-mcp/server.py .
-cp /ruta/al/repo/joplin-mcp/requirements.txt .
+# Copy necessary files from the cloned repository
+cp /path/to/repo/joplin-mcp/server.py .
+cp /path/to/repo/joplin-mcp/requirements.txt .
 ```
 
-### Paso 2: Crear entorno virtual Python
+### Step 2: Create Python virtual environment
 
 ```bash
-# Crear entorno virtual
+# Create virtual environment
 python3 -m venv venv
 
-# Activar entorno virtual
+# Activate virtual environment
 source venv/bin/activate
 
-# Instalar dependencias
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Verificar instalación
+# Verify installation
 pip list | grep -E "mcp|httpx"
 ```
 
-### Paso 3: Configurar el token de Joplin
+### Step 3: Configure the Joplin token
 
-Necesitas obtener tu token de Joplin Web Clipper:
+You need to obtain your Joplin Web Clipper token:
 
-1. Abre **Joplin Desktop**
-2. Ve a **Options > Web Clipper**
-3. Habilita **"Enable Web Clipper"**
-4. Copia el valor de **"API Token"**
+1. Open **Joplin Desktop**
+2. Go to **Options > Web Clipper**
+3. Enable **"Enable Web Clipper"**
+4. Copy the value of **"API Token"**
 
-### Paso 4: Crear el script wrapper
+### Step 4: Create the wrapper script
 
-Crea el archivo `run_mcp.sh` con tu token:
+Create the `run_mcp.sh` file with your token:
 
 ```bash
 cat > ~/.joplin-mcp/run_mcp.sh << 'EOF'
 #!/bin/bash
-export JOPLIN_TOKEN="PEGA_TU_TOKEN_AQUI"
+export JOPLIN_TOKEN="PASTE_YOUR_TOKEN_HERE"
 export JOPLIN_PORT="41184"
 exec ~/.joplin-mcp/venv/bin/python ~/.joplin-mcp/server.py
 EOF
 
-# Hacer ejecutable
+# Make executable
 chmod +x ~/.joplin-mcp/run_mcp.sh
 ```
 
-⚠️ **Importante**: Reemplaza `PEGA_TU_TOKEN_AQUI` con tu token real de Joplin.
+⚠️ **Important**: Replace `PASTE_YOUR_TOKEN_HERE` with your actual Joplin token.
 
-### Paso 5: Configurar OpenCode manualmente
+### Step 5: Configure OpenCode manually
 
-Edita el archivo `~/.config/opencode/opencode.json`:
+Edit the file `~/.config/opencode/opencode.json`:
 
 ```bash
-# Crear el directorio si no existe
+# Create the directory if it doesn't exist
 mkdir -p ~/.config/opencode
 
-# Añadir configuración (si el archivo ya existe, añade solo la sección mcp.joplin)
+# Add configuration (if the file already exists, add only the mcp.joplin section)
 cat >> ~/.config/opencode/opencode.json << 'EOF'
 {
   "mcp": {
     "joplin": {
       "type": "local",
-      "command": ["/home/TU_USUARIO/.joplin-mcp/run_mcp.sh"],
+      "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
     }
   }
@@ -165,41 +165,41 @@ cat >> ~/.config/opencode/opencode.json << 'EOF'
 EOF
 ```
 
-**Nota**: Reemplaza `/home/TU_USUARIO/` con tu ruta real (usa `echo $HOME` para verificar).
+**Note**: Replace `/home/YOUR_USER/` with your actual path (use `echo $HOME` to verify).
 
-### Paso 6: Verificar la instalación
+### Step 6: Verify the installation
 
 ```bash
-# Probar el servidor MCP
+# Test the MCP server
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' | ~/.joplin-mcp/run_mcp.sh
 
-# Si ves una respuesta JSON, ¡todo está funcionando!
+# If you see a JSON response, everything is working!
 ```
 
 ---
 
-## Configuración
+## Configuration
 
 ### OpenCode
 
-El instalador configura automáticamente `~/.config/opencode/opencode.json`:
+The installer automatically configures `~/.config/opencode/opencode.json`:
 
 ```json
 {
   "mcp": {
     "joplin": {
       "type": "local",
-      "command": ["/home/TU_USUARIO/.joplin-mcp/run_mcp.sh"],
+      "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
     }
   }
 }
 ```
 
-Si necesitas configurarlo manualmente:
+If you need to configure it manually:
 
 ```bash
-# Añadir a ~/.config/opencode/opencode.json
+# Add to ~/.config/opencode/opencode.json
 {
   "mcp": {
     "joplin": {
@@ -213,7 +213,7 @@ Si necesitas configurarlo manualmente:
 
 ### Claude Desktop
 
-Añade a tu configuración (`claude_desktop_config.json`):
+Add to your configuration (`claude_desktop_config.json`):
 
 ```json
 {
@@ -226,10 +226,10 @@ Añade a tu configuración (`claude_desktop_config.json`):
         "mcp[cli]",
         "--with",
         "httpx",
-        "/home/TU_USUARIO/.joplin-mcp/server.py"
+        "/home/YOUR_USER/.joplin-mcp/server.py"
       ],
       "env": {
-        "JOPLIN_TOKEN": "TU_TOKEN_AQUI",
+        "JOPLIN_TOKEN": "YOUR_TOKEN_HERE",
         "JOPLIN_PORT": "41184"
       }
     }
@@ -239,124 +239,124 @@ Añade a tu configuración (`claude_desktop_config.json`):
 
 ---
 
-## Gestión de la Instalación
+## Installation Management
 
-### Comandos útiles
+### Useful Commands
 
 ```bash
-# Diagnóstico y verificación
+# Diagnosis and verification
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 
-# Desinstalar completamente
+# Uninstall completely
 ~/.joplin-mcp/uninstall.sh
 
-# Reinstalar o actualizar
-cd /ruta/al/repo/joplin-mcp
+# Reinstall or update
+cd /path/to/repo/joplin-mcp
 ./install.sh
 ```
 
-### Estructura de la instalación
+### Installation Structure
 
 ```
 ~/.joplin-mcp/
-├── server.py              # Servidor MCP
-├── requirements.txt       # Dependencias
-├── run_mcp.sh            # Script wrapper (con tu token)
-├── venv/                 # Entorno virtual Python
-├── logs/                 # Logs de instalación y operación
+├── server.py              # MCP Server
+├── requirements.txt       # Dependencies
+├── run_mcp.sh            # Wrapper script (with your token)
+├── venv/                 # Python virtual environment
+├── logs/                 # Installation and operation logs
 │   └── install.log
-├── backup/               # Backups automáticos
+├── backup/               # Automatic backups
 │   └── 20250121_143022/
 │       ├── opencode.json.backup
 │       └── joplin-settings.json.backup
-├── joplin-mcp-doctor.sh  # Script de diagnóstico
-├── uninstall.sh          # Desinstalador
-└── VERSION               # Versión instalada
+├── joplin-mcp-doctor.sh  # Diagnostic script
+├── uninstall.sh          # Uninstaller
+└── VERSION               # Installed version
 ```
 
 ---
 
-## Desinstalación
+## Uninstallation
 
-Para desinstalar completamente el Joplin MCP:
+To completely uninstall Joplin MCP:
 
-### Método 1: Usar el desinstalador (Recomendado)
+### Method 1: Use the uninstaller (Recommended)
 
 ```bash
-# Ejecutar el desinstalador
+# Run the uninstaller
 ~/.joplin-mcp/uninstall.sh
 ```
 
-Este script:
-1. Crea un backup de tu instalación actual
-2. Elimina la entrada del MCP de `~/.config/opencode/opencode.json`
-3. Elimina el directorio `~/.joplin-mcp/`
-4. Muestra la ubicación del backup
+This script:
+1. Creates a backup of your current installation
+2. Removes the MCP entry from `~/.config/opencode/opencode.json`
+3. Removes the `~/.joplin-mcp/` directory
+4. Shows the backup location
 
-### Método 2: Desinstalación manual
+### Method 2: Manual uninstallation
 
 ```bash
-# 1. Eliminar configuración de OpenCode
-# Edita ~/.config/opencode/opencode.json y elimina la sección mcp.joplin
+# 1. Remove OpenCode configuration
+# Edit ~/.config/opencode/opencode.json and remove the mcp.joplin section
 
-# 2. Eliminar directorio de instalación
+# 2. Remove installation directory
 rm -rf ~/.joplin-mcp
 
-# 3. Verificar que no quedan procesos activos
+# 3. Verify no active processes remain
 pkill -f "joplin-mcp" 2>/dev/null || true
 ```
 
-### Limpieza completa (incluyendo backups)
+### Complete cleanup (including backups)
 
 ```bash
-# Eliminar instalación y todos los backups
+# Remove installation and all backups
 rm -rf ~/.joplin-mcp
 rm -rf ~/.joplin-mcp-backup-*
 ```
 
 ---
 
-## Solución de Problemas
+## Troubleshooting
 
 ### Error 403: Authentication failed
 
 ```bash
-# Verificar que el token funciona
-curl "http://localhost:41184/notes?token=TU_TOKEN&limit=1"
+# Verify that the token works
+curl "http://localhost:41184/notes?token=YOUR_TOKEN&limit=1"
 
-# Si falla, reinstalar con nuevo token
+# If it fails, reinstall with new token
 ./install.sh
 ```
 
 ### Error: Joplin server not available
 
 ```bash
-# Verificar que Joplin responde
+# Verify that Joplin responds
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 
-# Asegurarse de que:
-# 1. Joplin desktop está ejecutándose
-# 2. Web Clipper está habilitado (Options > Web Clipper > Enable)
-# 3. El puerto 41184 está disponible
+# Ensure that:
+# 1. Joplin desktop is running
+# 2. Web Clipper is enabled (Options > Web Clipper > Enable)
+# 3. Port 41184 is available
 ```
 
 ### Error: MCP server not responding
 
 ```bash
-# Verificar instalación
+# Verify installation
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 
-# Ver logs
+# Check logs
 cat ~/.joplin-mcp/logs/install.log
 
-# Reinstalar si es necesario
+# Reinstall if necessary
 ./install.sh
 ```
 
-### Error: Permiso denegado (permission denied)
+### Error: Permission denied
 
 ```bash
-# Asegurar que los scripts son ejecutables
+# Ensure that scripts are executable
 chmod +x ~/.joplin-mcp/run_mcp.sh
 chmod +x ~/.joplin-mcp/joplin-mcp-doctor.sh
 chmod +x ~/.joplin-mcp/uninstall.sh
@@ -364,57 +364,57 @@ chmod +x ~/.joplin-mcp/uninstall.sh
 
 ---
 
-## Recuperación de Backup
+## Backup Recovery
 
-Si algo sale mal, puedes restaurar el backup:
+If something goes wrong, you can restore the backup:
 
-### Ver backups disponibles
+### View available backups
 
 ```bash
-# Listar todos los backups
+# List all backups
 ls -la ~/.joplin-mcp/backup/
 
-# Ver el backup más reciente
+# View the most recent backup
 cat ~/.joplin-mcp/LATEST_BACKUP
 ```
 
-### Restaurar configuración de OpenCode
+### Restore OpenCode configuration
 
 ```bash
-# Restaurar desde un backup específico
+# Restore from a specific backup
 cp ~/.joplin-mcp/backup/20250121_143022/opencode.json.backup ~/.config/opencode/opencode.json
 
-# O restaurar desde el backup automático del desinstalador
-cp ~/.joplin-mcp-backup-*/opencode.json.backup ~/.config/opencode/opencode.json 2>/dev/null || echo "No hay backup automático"
+# Or restore from the automatic uninstaller backup
+cp ~/.joplin-mcp-backup-*/opencode.json.backup ~/.config/opencode/opencode.json 2>/dev/null || echo "No automatic backup"
 ```
 
-### Restaurar instalación completa
+### Restore complete installation
 
 ```bash
-# Si desinstalaste pero tienes backup
-rm -rf ~/.joplin-mcp  # Si existe una instalación parcial
+# If you uninstalled but have backup
+rm -rf ~/.joplin-mcp  # If a partial installation exists
 cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
 
-# Reconfigurar permisos
+# Reconfigure permissions
 chmod +x ~/.joplin-mcp/run_mcp.sh
 chmod +x ~/.joplin-mcp/*.sh
 ```
 
 ---
 
-## Notas de Seguridad
+## Security Notes
 
-- **Nunca compartas tu token de Joplin**: El token permite acceso completo a tus notas
-- **Permisos de archivos**: El token se guarda en `~/.joplin-mcp/run_mcp.sh` con permisos de usuario (0o600)
-- **Backups**: Los backups contienen tu token, protégelos adecuadamente
-- **Repositorio**: Nunca hagas commit de archivos con tokens reales
+- **Never share your Joplin token**: The token allows full access to your notes
+- **File permissions**: The token is stored in `~/.joplin-mcp/run_mcp.sh` with user permissions (0o600)
+- **Backups**: Backups contain your token, protect them appropriately
+- **Repository**: Never commit files with real tokens
 
 ---
 
-## Soporte
+## Support
 
-Si encuentras problemas durante la instalación:
+If you encounter problems during installation:
 
-1. Ejecuta el diagnóstico: `~/.joplin-mcp/joplin-mcp-doctor.sh`
-2. Revisa los logs: `~/.joplin-mcp/logs/install.log`
-3. Abre un issue en GitHub con la salida del diagnóstico
+1. Run the diagnostic: `~/.joplin-mcp/joplin-mcp-doctor.sh`
+2. Check the logs: `~/.joplin-mcp/logs/install.log`
+3. Open an issue on GitHub with the diagnostic output

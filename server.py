@@ -66,29 +66,29 @@ def list_notebooks():
 TOOLS = [
     {
         "name": "search_notes",
-        "description": "Busca notas en Joplin utilizando una palabra clave. Devuelve una lista de IDs y Títulos.",
+        "description": "Searches notes in Joplin using a keyword. Returns a list of IDs and titles.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "La palabra o frase a buscar"}
+                "query": {"type": "string", "description": "The word or phrase to search for"}
             },
             "required": ["query"]
         }
     },
     {
         "name": "read_note",
-        "description": "Lee el contenido completo en Markdown de una nota específica dado su ID.",
+        "description": "Reads the full Markdown content of a specific note given its ID.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "note_id": {"type": "string", "description": "El ID de la nota en Joplin"}
+                "note_id": {"type": "string", "description": "The note ID in Joplin"}
             },
             "required": ["note_id"]
         }
     },
     {
         "name": "list_notebooks",
-        "description": "Obtiene una lista de todos los cuadernos (libretas) en Joplin.",
+        "description": "Obtains a list of all notebooks in Joplin.",
         "inputSchema": {
             "type": "object",
             "properties": {}
@@ -111,7 +111,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.2.0"
+                    "version": "1.3.0"
                 }
             }
         }

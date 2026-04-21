@@ -1,15 +1,15 @@
 #!/bin/bash
-# Joplin MCP Installer v1.2
-# Instalador completo con validación, backup y tests
+# Joplin MCP Installer v1.3
+# Complete installer with validation, backup, and tests
 
 set -e  # Exit on error
 
-# Colors for output
+# Colours for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m' # No Colour
 
 # Configuration
 INSTALL_DIR="$HOME/.joplin-mcp"
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.2"
+VERSION="1.3"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -44,7 +44,7 @@ error() {
 # ============================================================
 
 detect_os() {
-    log "Detectando sistema operativo..."
+    log "Detecting operating system..."
     
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
@@ -56,54 +56,54 @@ detect_os() {
         OS="unknown"
     fi
     
-    success "Sistema operativo detectado: $OS"
+    success "Operating system detected: $OS"
 }
 
 check_system_deps() {
-    log "Verificando dependencias del sistema..."
+    log "Checking system dependencies..."
     
     local deps_ok=true
     
     # Check Python 3
     if ! command -v python3 &> /dev/null; then
-        error "Python 3 no está instalado"
+        error "Python 3 is not installed"
         deps_ok=false
     else
         PYTHON_VERSION=$(python3 --version 2>&1 | grep -oP '\d+\.\d+')
-        success "Python 3 encontrado: $PYTHON_VERSION"
+        success "Python 3 found: $PYTHON_VERSION"
         
         # Check version >= 3.9
         if python3 -c "import sys; exit(0 if sys.version_info >= (3, 9) else 1)"; then
-            success "Versión de Python compatible (>= 3.9)"
+            success "Compatible Python version (>= 3.9)"
         else
-            warning "Python < 3.9 detectado. Puede haber problemas de compatibilidad."
+            warning "Python < 3.9 detected. There may be compatibility issues."
         fi
     fi
     
     # Check pip
     if ! command -v pip3 &> /dev/null && ! command -v pip &> /dev/null; then
-        error "pip no está instalado"
+        error "pip is not installed"
         deps_ok=false
     else
-        success "pip encontrado"
+        success "pip found"
     fi
     
     # Check curl
     if ! command -v curl &> /dev/null; then
-        warning "curl no está instalado (necesario para validación)"
+        warning "curl is not installed (required for validation)"
         deps_ok=false
     else
-        success "curl encontrado"
+        success "curl found"
     fi
     
     if [ "$deps_ok" = false ]; then
-        error "Faltan dependencias críticas. Por favor instálalas e intenta de nuevo."
+        error "Critical dependencies missing. Please install them and try again."
         exit 1
     fi
 }
 
 check_joplin_installed() {
-    log "Verificando instalación de Joplin..."
+    log "Checking Joplin installation..."
     
     local joplin_found=false
     local settings_path=""
@@ -123,73 +123,73 @@ check_joplin_installed() {
     fi
     
     if [ "$joplin_found" = true ]; then
-        success "Joplin encontrado"
+        success "Joplin found"
         
         # Check if Web Clipper might be enabled (check if port is in use)
         if command -v lsof &> /dev/null; then
             if lsof -Pi :41184 -sTCP:LISTEN -t >/dev/null 2>&1 || \
                netstat -tuln 2>/dev/null | grep -q ':41184'; then
-                success "Web Clipper parece estar habilitado (puerto 41184)"
+                success "Web Clipper appears to be enabled (port 41184)"
             else
-                warning "Web Clipper no detectado en puerto 41184"
-                warning "Asegúrate de habilitarlo en Joplin: Options > Web Clipper > Enable Web Clipper"
+                warning "Web Clipper not detected on port 41184"
+                warning "Ensure you enable it in Joplin: Options > Web Clipper > Enable Web Clipper"
             fi
         fi
     else
-        warning "No se encontró Joplin en las ubicaciones estándar"
-        warning "Asegúrate de tener Joplin instalado y configurado"
+        warning "Joplin not found in standard locations"
+        warning "Ensure you have Joplin installed and configured"
     fi
 }
 
 check_existing_installation() {
-    log "Verificando instalación previa..."
+    log "Checking previous installation..."
     
     echo ""
-    echo "Selecciona una opción:"
+    echo "Select an option:"
     
     if [ -d "$INSTALL_DIR" ]; then
-        warning "Instalación previa detectada en $INSTALL_DIR"
-        echo "1) Reinstalar (eliminar todo y volver a instalar)"
-        echo "2) Actualizar (preservar configuración)"
-        echo "3) Cancelar"
+        warning "Previous installation detected in $INSTALL_DIR"
+        echo "1) Reinstall (remove everything and install again)"
+        echo "2) Update (preserve configuration)"
+        echo "3) Cancel"
         echo ""
-        read -p "Opción [1-3]: " choice
+        read -p "Option [1-3]: " choice
         
         case $choice in
             1)
-                log "Realizando reinstalación completa..."
+                log "Performing complete reinstall..."
                 backup_existing
                 rm -rf "$INSTALL_DIR"
                 ;;
             2)
-                log "Actualizando instalación existente..."
+                log "Updating existing installation..."
                 UPDATE_MODE=true
                 ;;
             3)
-                log "Instalación cancelada por el usuario"
+                log "Installation cancelled by user"
                 exit 0
                 ;;
             *)
-                error "Opción inválida"
+                error "Invalid option"
                 exit 1
                 ;;
         esac
     else
-        echo "1) Instalar"
-        echo "2) Cancelar"
+        echo "1) Install"
+        echo "2) Cancel"
         echo ""
-        read -p "Opción [1-2]: " choice
+        read -p "Option [1-2]: " choice
         
         case $choice in
             1)
-                log "Procediendo con la instalación..."
+                log "Proceeding with installation..."
                 ;;
             2)
-                log "Instalación cancelada por el usuario"
+                log "Installation cancelled by user"
                 exit 0
                 ;;
             *)
-                error "Opción inválida"
+                error "Invalid option"
                 exit 1
                 ;;
         esac
@@ -197,18 +197,18 @@ check_existing_installation() {
 }
 
 backup_existing() {
-    log "Creando backup de instalación existente..."
+    log "Creating backup of existing installation..."
     mkdir -p "$BACKUP_DIR"
     
     if [ -d "$INSTALL_DIR" ]; then
-        # Excluir directorio backup para evitar copia recursiva infinita
+        # Exclude backup directory to avoid infinite recursive copy
         if command -v rsync &>/dev/null; then
             rsync -a --exclude="backup" "$INSTALL_DIR/" "$BACKUP_DIR/"
         else
-            # Usar find y cp como alternativa sin rsync
+            # Use find and cp as alternative without rsync
             find "$INSTALL_DIR" -mindepth 1 -maxdepth 1 ! -name "backup" -exec cp -r {} "$BACKUP_DIR/" \;
         fi
-        success "Backup de instalación guardado en: $BACKUP_DIR"
+        success "Installation backup saved to: $BACKUP_DIR"
     fi
 }
 
@@ -217,26 +217,26 @@ backup_existing() {
 # ============================================================
 
 backup_config() {
-    log "Creando backup de configuraciones..."
+    log "Creating backup of configurations..."
     
     mkdir -p "$BACKUP_DIR"
     
     # Backup opencode.json
     if [ -f "$CONFIG_DIR/opencode.json" ]; then
         cp "$CONFIG_DIR/opencode.json" "$BACKUP_DIR/opencode.json.backup"
-        success "Backup de opencode.json creado"
+        success "Backup of opencode.json created"
     fi
     
     # Backup Joplin settings (for reference)
     if [ -f "$JOPLIN_CONFIG_DIR/settings.json" ]; then
         cp "$JOPLIN_CONFIG_DIR/settings.json" "$BACKUP_DIR/joplin-settings.json.backup"
-        success "Backup de settings de Joplin creado"
+        success "Backup of Joplin settings created"
     fi
     
     # Save backup reference
     echo "$BACKUP_DIR" > "$INSTALL_DIR/LATEST_BACKUP" 2>/dev/null || true
     
-    success "Backup guardado en: $BACKUP_DIR"
+    success "Backup saved to: $BACKUP_DIR"
 }
 
 # ============================================================
@@ -244,7 +244,7 @@ backup_config() {
 # ============================================================
 
 search_joplin_token() {
-    log "Buscando token de Joplin..."
+    log "Searching for Joplin token..."
     
     local settings_files=(
         "$JOPLIN_CONFIG_DIR/settings.json"
@@ -254,7 +254,7 @@ search_joplin_token() {
     
     for settings_file in "${settings_files[@]}"; do
         if [ -f "$settings_file" ]; then
-            log "Analizando: $settings_file"
+            log "Analysing: $settings_file"
             
             # Try to extract token using Python
             TOKEN=$(python3 -c "
@@ -272,7 +272,7 @@ except Exception as e:
 " 2>/dev/null)
             
             if [ -n "$TOKEN" ]; then
-                success "Token encontrado en settings.json"
+                success "Token found in settings.json"
                 return 0
             fi
         fi
@@ -285,44 +285,44 @@ validate_token() {
     local token=$1
     local port=${JOPLIN_PORT:-41184}
     
-    log "Validando token con Joplin..."
+    log "Validating token with Joplin..."
     
     # Test connection to Joplin
     local response
     response=$(curl -s "http://localhost:$port/notes?token=$token&limit=1" 2>/dev/null || echo "")
     
     if echo "$response" | grep -q '"items"'; then
-        success "Token válido - Conexión exitosa con Joplin"
+        success "Token valid - Successful connection with Joplin"
         return 0
     else
-        error "Token inválido o Joplin no responde"
+        error "Invalid token or Joplin not responding"
         return 1
     fi
 }
 
 prompt_for_token() {
-    log "Solicitando token al usuario..."
+    log "Requesting token from user..."
     
     echo ""
     echo "========================================"
-    echo "  CONFIGURACIÓN DE TOKEN"
+    echo "  TOKEN CONFIGURATION"
     echo "========================================"
     echo ""
-    echo "No se encontró token automáticamente."
+    echo "Token not found automatically."
     echo ""
-    echo "Para obtener tu token:"
-    echo "  1. Abre Joplin"
-    echo "  2. Ve a Options > Web Clipper"
-    echo "  3. Habilita 'Enable Web Clipper' si no está habilitado"
-    echo "  4. Copia el token de 'API Token'"
+    echo "To obtain your token:"
+    echo "  1. Open Joplin"
+    echo "  2. Go to Options > Web Clipper"
+    echo "  3. Enable 'Enable Web Clipper' if not enabled"
+    echo "  4. Copy the token from 'API Token'"
     echo ""
     
     while true; do
-        read -s -p "Ingresa tu token de Joplin: " TOKEN
+        read -s -p "Enter your Joplin token: " TOKEN
         echo ""
         
         if [ ${#TOKEN} -lt 10 ]; then
-            error "Token muy corto. Debe tener al menos 10 caracteres."
+            error "Token too short. Must be at least 10 characters."
             continue
         fi
         
@@ -331,13 +331,13 @@ prompt_for_token() {
             break
         else
             echo ""
-            warning "No se pudo validar el token. Posibles causas:"
-            warning "  - Joplin no está ejecutándose"
-            warning "  - Web Clipper no está habilitado"
-            warning "  - El puerto es diferente a 41184"
+            warning "Could not validate token. Possible causes:"
+            warning "  - Joplin is not running"
+            warning "  - Web Clipper is not enabled"
+            warning "  - The port is different from 41184"
             echo ""
-            read -p "¿Deseas continuar de todos modos? (s/n): " continue_anyway
-            if [ "$continue_anyway" = "s" ]; then
+            read -p "Do you wish to continue anyway? (y/n): " continue_anyway
+            if [ "$continue_anyway" = "y" ]; then
                 break
             fi
         fi
@@ -351,9 +351,9 @@ get_token() {
     
     # Confirm token with user
     echo ""
-    echo "Token configurado: ${TOKEN:0:10}... (${#TOKEN} caracteres)"
-    read -p "¿Es correcto? (s/n): " confirm
-    if [ "$confirm" != "s" ]; then
+    echo "Token configured: ${TOKEN:0:10}... (${#TOKEN} characters)"
+    read -p "Is this correct? (y/n): " confirm
+    if [ "$confirm" != "y" ]; then
         prompt_for_token
     fi
 }
@@ -363,7 +363,7 @@ get_token() {
 # ============================================================
 
 install_files() {
-    log "Instalando archivos..."
+    log "Installing files..."
     
     # Create directory structure
     mkdir -p "$INSTALL_DIR"/{bin,logs,backup}
@@ -374,28 +374,28 @@ install_files() {
     # Copy main files
     if [ -f "$SCRIPT_DIR/server.py" ]; then
         cp "$SCRIPT_DIR/server.py" "$INSTALL_DIR/"
-        success "server.py instalado"
+        success "server.py installed"
     else
-        error "server.py no encontrado en el directorio del script"
+        error "server.py not found in script directory"
         exit 1
     fi
     
     if [ -f "$SCRIPT_DIR/requirements.txt" ]; then
         cp "$SCRIPT_DIR/requirements.txt" "$INSTALL_DIR/"
-        success "requirements.txt instalado"
+        success "requirements.txt installed"
     else
-        error "requirements.txt no encontrado"
+        error "requirements.txt not found"
         exit 1
     fi
     
     # Create version file
     echo "$VERSION" > "$INSTALL_DIR/VERSION"
     
-    success "Archivos instalados en: $INSTALL_DIR"
+    success "Files installed to: $INSTALL_DIR"
 }
 
 generate_wrapper_script() {
-    log "Generando script wrapper..."
+    log "Generating wrapper script..."
     
     cat > "$INSTALL_DIR/run_mcp.sh" << EOF
 #!/bin/bash
@@ -410,28 +410,28 @@ exec $INSTALL_DIR/venv/bin/python $INSTALL_DIR/server.py
 EOF
     
     chmod +x "$INSTALL_DIR/run_mcp.sh"
-    success "Script wrapper creado: $INSTALL_DIR/run_mcp.sh"
+    success "Wrapper script created: $INSTALL_DIR/run_mcp.sh"
 }
 
 install_python_deps() {
-    log "Instalando dependencias Python..."
+    log "Installing Python dependencies..."
     
     # Create virtual environment
     if [ ! -d "$INSTALL_DIR/venv" ]; then
         python3 -m venv "$INSTALL_DIR/venv"
-        success "Entorno virtual creado"
+        success "Virtual environment created"
     fi
     
     # Activate and install
     source "$INSTALL_DIR/venv/bin/activate"
     
-    log "Actualizando pip..."
+    log "Upgrading pip..."
     pip install --upgrade pip >> "$LOG_FILE" 2>&1
     
-    log "Instalando dependencias..."
+    log "Installing dependencies..."
     pip install -r "$INSTALL_DIR/requirements.txt" >> "$LOG_FILE" 2>&1
     
-    success "Dependencias instaladas"
+    success "Dependencies installed"
 }
 
 # ============================================================
@@ -439,7 +439,7 @@ install_python_deps() {
 # ============================================================
 
 configure_opencode() {
-    log "Configurando OpenCode..."
+    log "Configuring OpenCode..."
     
     local config_file="$CONFIG_DIR/opencode.json"
     
@@ -460,7 +460,7 @@ if os.path.exists(config_file):
         with open(config_file, 'r') as f:
             config = json.load(f)
     except json.JSONDecodeError:
-        print(f"Warning: {config_file} tiene formato inválido, creando nuevo")
+        print(f"Warning: {config_file} has invalid format, creating new")
         config = {}
 else:
     config = {}
@@ -480,13 +480,13 @@ config['mcp']['joplin'] = {
 with open(config_file, 'w') as f:
     json.dump(config, f, indent=2)
 
-print(f"Configuración actualizada: {config_file}")
+print(f"Configuration updated: {config_file}")
 EOF
     
     if [ $? -eq 0 ]; then
-        success "OpenCode configurado correctamente"
+        success "OpenCode configured correctly"
     else
-        error "Error al configurar OpenCode"
+        error "Error configuring OpenCode"
         return 1
     fi
 }
@@ -496,37 +496,37 @@ EOF
 # ============================================================
 
 test_mcp_server() {
-    log "Probando servidor MCP..."
+    log "Testing MCP server..."
     
     local response
     response=$(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' | "$INSTALL_DIR/run_mcp.sh" 2>/dev/null | head -1)
     
     if echo "$response" | grep -q '"jsonrpc"'; then
-        success "Servidor MCP responde correctamente"
+        success "MCP server responding correctly"
         return 0
     else
-        error "El servidor MCP no responde correctamente"
+        error "MCP server not responding correctly"
         return 1
     fi
 }
 
 test_mcp_tools() {
-    log "Probando herramientas MCP..."
+    log "Testing MCP tools..."
     
     local response
     response=$(echo '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | "$INSTALL_DIR/run_mcp.sh" 2>/dev/null | head -1)
     
     if echo "$response" | grep -q '"tools"'; then
-        success "Herramientas MCP disponibles"
+        success "MCP tools available"
         
         # Count tools
         local tool_count
         tool_count=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('result',{}).get('tools',[])))" 2>/dev/null || echo "?")
-        success "Número de herramientas: $tool_count"
+        success "Number of tools: $tool_count"
         
         return 0
     else
-        error "No se pudieron cargar las herramientas MCP"
+        error "Could not load MCP tools"
         return 1
     fi
 }
@@ -536,12 +536,12 @@ test_mcp_tools() {
 # ============================================================
 
 create_helper_scripts() {
-    log "Creando scripts auxiliares..."
+    log "Creating helper scripts..."
     
     # Create doctor script
     cat > "$INSTALL_DIR/joplin-mcp-doctor.sh" << 'EOF'
 #!/bin/bash
-# Joplin MCP Doctor - Script de diagnóstico
+# Joplin MCP Doctor - Diagnostic script
 
 INSTALL_DIR="$HOME/.joplin-mcp"
 RED='\033[0;31m'
@@ -556,61 +556,61 @@ echo ""
 
 # Check installation
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo -e "${RED}✗${NC} Joplin MCP no está instalado en $INSTALL_DIR"
+    echo -e "${RED}✗${NC} Joplin MCP is not installed in $INSTALL_DIR"
     exit 1
 fi
 
-echo -e "${GREEN}✓${NC} Instalación encontrada: $INSTALL_DIR"
+echo -e "${GREEN}✓${NC} Installation found: $INSTALL_DIR"
 
 # Check files
-[ -f "$INSTALL_DIR/server.py" ] && echo -e "${GREEN}✓${NC} server.py existe" || echo -e "${RED}✗${NC} server.py no encontrado"
-[ -f "$INSTALL_DIR/run_mcp.sh" ] && echo -e "${GREEN}✓${NC} run_mcp.sh existe" || echo -e "${RED}✗${NC} run_mcp.sh no encontrado"
-[ -f "$INSTALL_DIR/venv/bin/python" ] && echo -e "${GREEN}✓${NC} Entorno virtual existe" || echo -e "${RED}✗${NC} Entorno virtual no encontrado"
+[ -f "$INSTALL_DIR/server.py" ] && echo -e "${GREEN}✓${NC} server.py exists" || echo -e "${RED}✗${NC} server.py not found"
+[ -f "$INSTALL_DIR/run_mcp.sh" ] && echo -e "${GREEN}✓${NC} run_mcp.sh exists" || echo -e "${RED}✗${NC} run_mcp.sh not found"
+[ -f "$INSTALL_DIR/venv/bin/python" ] && echo -e "${GREEN}✓${NC} Virtual environment exists" || echo -e "${RED}✗${NC} Virtual environment not found"
 
 # Check token
 if [ -f "$INSTALL_DIR/run_mcp.sh" ]; then
     source "$INSTALL_DIR/run_mcp.sh" 2>/dev/null
     if [ -n "$JOPLIN_TOKEN" ]; then
-        echo -e "${GREEN}✓${NC} Token configurado (${#JOPLIN_TOKEN} caracteres)"
+        echo -e "${GREEN}✓${NC} Token configured (${#JOPLIN_TOKEN} characters)"
     else
-        echo -e "${RED}✗${NC} Token no configurado"
+        echo -e "${RED}✗${NC} Token not configured"
     fi
 fi
 
 # Check Joplin
 port="${JOPLIN_PORT:-41184}"
 if curl -s "http://localhost:$port/ping" > /dev/null 2>&1; then
-    echo -e "${GREEN}✓${NC} Joplin responde en puerto $port"
+    echo -e "${GREEN}✓${NC} Joplin responding on port $port"
 else
-    echo -e "${YELLOW}⚠${NC} Joplin no responde en puerto $port (¿está ejecutándose?)"
+    echo -e "${YELLOW}⚠${NC} Joplin not responding on port $port (is it running?)"
 fi
 
 # Test token
 echo ""
-echo "Probando conexión con token..."
+echo "Testing connection with token..."
 if curl -s "http://localhost:$port/notes?token=$JOPLIN_TOKEN&limit=1" 2>/dev/null | grep -q '"items"'; then
-    echo -e "${GREEN}✓${NC} Token válido - Conexión exitosa"
+    echo -e "${GREEN}✓${NC} Token valid - Successful connection"
 else
-    echo -e "${RED}✗${NC} Token inválido o Joplin no acepta conexiones"
+    echo -e "${RED}✗${NC} Invalid token or Joplin not accepting connections"
 fi
 
 # Test MCP server
 echo ""
-echo "Probando servidor MCP..."
+echo "Testing MCP server..."
 response=$(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' | "$INSTALL_DIR/run_mcp.sh" 2>/dev/null | head -1)
 if echo "$response" | grep -q '"jsonrpc"'; then
-    echo -e "${GREEN}✓${NC} Servidor MCP responde"
+    echo -e "${GREEN}✓${NC} MCP server responding"
 else
-    echo -e "${RED}✗${NC} Servidor MCP no responde"
+    echo -e "${RED}✗${NC} MCP server not responding"
 fi
 
 echo ""
 echo "========================================"
-echo "  Diagnóstico completado"
+echo "  Diagnosis completed"
 echo "========================================"
 EOF
     chmod +x "$INSTALL_DIR/joplin-mcp-doctor.sh"
-    success "Script doctor creado"
+    success "Doctor script created"
     
     # Create uninstall script
     cat > "$INSTALL_DIR/uninstall.sh" << 'EOF'
@@ -620,25 +620,25 @@ EOF
 INSTALL_DIR="$HOME/.joplin-mcp"
 CONFIG_DIR="$HOME/.config/opencode"
 
-echo "Desinstalador de Joplin MCP"
+echo "Joplin MCP Uninstaller"
 echo "=========================="
 echo ""
 
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo "Joplin MCP no parece estar instalado en $INSTALL_DIR"
+    echo "Joplin MCP does not appear to be installed in $INSTALL_DIR"
     exit 0
 fi
 
-read -p "¿Eliminar ~/.joplin-mcp? (s/n): " confirm
-if [ "$confirm" != "s" ]; then
-    echo "Cancelado"
+read -p "Remove ~/.joplin-mcp? (y/n): " confirm
+if [ "$confirm" != "y" ]; then
+    echo "Cancelled"
     exit 0
 fi
 
 # Backup before removal
 backup_dir="$HOME/.joplin-mcp-backup-$(date +%Y%m%d_%H%M%S)"
 cp -r "$INSTALL_DIR" "$backup_dir"
-echo "Backup creado: $backup_dir"
+echo "Backup created: $backup_dir"
 
 # Remove from opencode.json
 if [ -f "$CONFIG_DIR/opencode.json" ]; then
@@ -656,9 +656,9 @@ try:
         del config['mcp']['joplin']
         with open(config_file, 'w') as f:
             json.dump(config, f, indent=2)
-        print("Configuración de OpenCode actualizada")
+        print("OpenCode configuration updated")
 except Exception as e:
-    print(f"Error al actualizar opencode.json: {e}")
+    print(f"Error updating opencode.json: {e}")
 PYEOF
 fi
 
@@ -666,11 +666,11 @@ fi
 rm -rf "$INSTALL_DIR"
 
 echo ""
-echo "Desinstalación completada"
-echo "Backup guardado en: $backup_dir"
+echo "Uninstallation completed"
+echo "Backup saved to: $backup_dir"
 EOF
     chmod +x "$INSTALL_DIR/uninstall.sh"
-    success "Script de desinstalación creado"
+    success "Uninstall script created"
 }
 
 # ============================================================
@@ -680,50 +680,50 @@ EOF
 show_summary() {
     echo ""
     echo "========================================"
-    echo -e "  ${GREEN}Instalación Completada - v$VERSION${NC}"
+    echo -e "  ${GREEN}Installation Completed - v$VERSION${NC}"
     echo "========================================"
     echo ""
-    echo "📁 Ubicación:     $INSTALL_DIR"
-    echo "⚙️  Configuración: $CONFIG_DIR/opencode.json"
-    echo "🔑 Token:         Configurado ✓"
-    echo "✅ Tests:         Pasados ✓"
+    echo "📁 Location:      $INSTALL_DIR"
+    echo "⚙️  Configuration: $CONFIG_DIR/opencode.json"
+    echo "🔑 Token:         Configured ✓"
+    echo "✅ Tests:         Passed ✓"
     echo ""
-    echo "🚀 Para usar en OpenCode:"
-    echo "   1. Reinicia OpenCode"
-    echo "   2. Prueba: 'Lista mis libretas de Joplin'"
+    echo "🚀 To use in OpenCode:"
+    echo "   1. Restart OpenCode"
+    echo "   2. Try: 'List my Joplin notebooks'"
     echo ""
-    echo "🔧 Comandos útiles:"
-    echo "   ~/.joplin-mcp/joplin-mcp-doctor.sh  # Diagnóstico"
-    echo "   ~/.joplin-mcp/uninstall.sh          # Desinstalar"
-    echo "   ./install.sh                        # Reinstalar/actualizar"
+    echo "🔧 Useful commands:"
+    echo "   ~/.joplin-mcp/joplin-mcp-doctor.sh  # Diagnostics"
+    echo "   ~/.joplin-mcp/uninstall.sh          # Uninstall"
+    echo "   ./install.sh                        # Reinstall/update"
     echo ""
-    echo "📋 Backup guardado en: $BACKUP_DIR"
-    echo "📝 Log de instalación: $LOG_FILE"
+    echo "📋 Backup saved to: $BACKUP_DIR"
+    echo "📝 Installation log: $LOG_FILE"
     echo "========================================"
 }
 
 show_error_help() {
     echo ""
     echo "========================================"
-    echo -e "  ${RED}ERROR EN INSTALACIÓN${NC}"
+    echo -e "  ${RED}INSTALLATION ERROR${NC}"
     echo "========================================"
     echo ""
-    echo "Posibles soluciones:"
+    echo "Possible solutions:"
     echo ""
-    echo "1. Verificar que Joplin esté ejecutándose"
-    echo "2. Habilitar Web Clipper en Joplin:"
+    echo "1. Verify that Joplin is running"
+    echo "2. Enable Web Clipper in Joplin:"
     echo "   Options > Web Clipper > Enable Web Clipper"
     echo ""
-    echo "3. Verificar el log de instalación:"
+    echo "3. Check the installation log:"
     echo "   cat $LOG_FILE"
     echo ""
-    echo "4. Ejecutar diagnóstico:"
+    echo "4. Run diagnostics:"
     echo "   ~/.joplin-mcp/joplin-mcp-doctor.sh"
     echo ""
-    echo "5. Restaurar backup:"
+    echo "5. Restore backup:"
     echo "   cp $BACKUP_DIR/opencode.json.backup ~/.config/opencode/opencode.json"
     echo ""
-    echo "6. Para reinstalar:"
+    echo "6. To reinstall:"
     echo "   ./install.sh"
     echo ""
     echo "========================================"
@@ -739,9 +739,9 @@ main() {
     echo "========================================"
     echo ""
     
-    # Initialize log
+    # Initialise log
     mkdir -p "$INSTALL_DIR/logs" 2>/dev/null || true
-    echo "=== Instalación iniciada: $(date) ===" > "$LOG_FILE"
+    echo "=== Installation started: $(date) ===" > "$LOG_FILE"
     
     # Phase 1: Pre-checks
     detect_os
@@ -768,21 +768,21 @@ main() {
     
     # Phase 7: Test
     echo ""
-    log "Ejecutando tests post-instalación..."
+    log "Running post-installation tests..."
     
     if test_mcp_server && test_mcp_tools; then
         show_summary
-        echo "=== Instalación completada exitosamente: $(date) ===" >> "$LOG_FILE"
+        echo "=== Installation completed successfully: $(date) ===" >> "$LOG_FILE"
         exit 0
     else
         show_error_help
-        echo "=== Instalación fallida: $(date) ===" >> "$LOG_FILE"
+        echo "=== Installation failed: $(date) ===" >> "$LOG_FILE"
         exit 1
     fi
 }
 
 # Handle Ctrl+C
-trap 'echo ""; error "Instalación cancelada"; exit 1' INT
+trap 'echo ""; error "Installation cancelled"; exit 1' INT
 
 # Run main
 main "$@"

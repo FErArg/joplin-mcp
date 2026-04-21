@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.2-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.3-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -14,9 +14,9 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Installation
 
-📖 **Guía completa de instalación**: Ver [INSTALL.md](INSTALL.md) para instrucciones detalladas de instalación, configuración y desinstalación.
+📖 **Complete installation guide**: See [INSTALL.md](INSTALL.md) for detailed installation, configuration, and uninstallation instructions.
 
-### Instalación Rápida
+### Quick Installation
 
 ```bash
 git clone https://github.com/ferarg/joplin-mcp.git
@@ -24,7 +24,7 @@ cd joplin-mcp
 ./install.sh
 ```
 
-El instalador automático detectará tu token de Joplin, configurará el entorno y validará la instalación. Para más opciones y configuración manual, consulta [INSTALL.md](INSTALL.md).
+The automatic installer will detect your Joplin token, configure the environment, and validate the installation. For more options and manual configuration, consult [INSTALL.md](INSTALL.md).
 
 ## Available Tools
 
@@ -75,50 +75,50 @@ Result:
 ### Error 403: Authentication failed
 
 ```bash
-# Verificar que el token funciona
-curl "http://localhost:41184/notes?token=TU_TOKEN&limit=1"
+# Verify that the token works
+curl "http://localhost:41184/notes?token=YOUR_TOKEN&limit=1"
 
-# Si falla, reinstalar con nuevo token
+# If it fails, reinstall with new token
 ./install.sh
 ```
 
 ### Error: Joplin server not available
 
 ```bash
-# Verificar que Joplin responde
+# Verify that Joplin responds
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 
-# Asegurarse de que:
-# 1. Joplin desktop está ejecutándose
-# 2. Web Clipper está habilitado (Options > Web Clipper > Enable)
-# 3. El puerto 41184 está disponible
+# Ensure that:
+# 1. Joplin desktop is running
+# 2. Web Clipper is enabled (Options > Web Clipper > Enable)
+# 3. Port 41184 is available
 ```
 
 ### Error: MCP server not responding
 
 ```bash
-# Verificar instalación
+# Verify installation
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 
-# Ver logs
+# View logs
 cat ~/.joplin-mcp/logs/install.log
 
-# Reinstalar si es necesario
+# Reinstall if necessary
 ./install.sh
 ```
 
-### Recuperar backup
+### Recover backup
 
-Si algo sale mal, puedes restaurar el backup:
+If something goes wrong, you can restore the backup:
 
 ```bash
-# Ver backups disponibles
+# View available backups
 ls -la ~/.joplin-mcp/backup/
 
-# Restaurar configuración de opencode
+# Restore opencode configuration
 cp ~/.joplin-mcp/backup/20250121_143022/opencode.json.backup ~/.config/opencode/opencode.json
 
-# O restaurar todo
+# Or restore everything
 rm -rf ~/.joplin-mcp
 cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
 ```
@@ -129,28 +129,34 @@ cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
 
 ```
 joplin-mcp/
-├── install.sh              # Instalador principal
-├── uninstall.sh            # Desinstalador
-├── joplin-mcp-doctor.sh    # Script de diagnóstico
-├── run_mcp.sh              # Template del wrapper
-├── server.py               # Servidor MCP
-├── requirements.txt        # Dependencias Python
-├── mcp_config.json         # Ejemplo para Claude Desktop
-├── CHANGELOG.md            # Historial de cambios
-└── README.md               # Este archivo
+├── install.sh              # Main installer
+├── uninstall.sh            # Uninstaller
+├── joplin-mcp-doctor.sh    # Diagnostic script
+├── run_mcp.sh              # Wrapper template
+├── server.py               # MCP server
+├── requirements.txt        # Python dependencies
+├── mcp_config.json         # Example for Claude Desktop
+├── CHANGELOG.md            # Change history
+└── README.md               # This file
 ```
 
 ### Testing
 
 ```bash
-# Test manual del servidor
+# Manual server test
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' | ~/.joplin-mcp/run_mcp.sh
 
-# Diagnóstico completo
+# Full diagnostic
 ~/.joplin-mcp/joplin-mcp-doctor.sh
 ```
 
 ## Changelog
+
+### v1.3 (2025-04-21)
+- Complete translation to British English
+- Added project attribution (JoplinApp, OpenCode, MCP Protocol)
+- Updated all version references to 1.3
+- Security verification: no personal information leaks
 
 ### v1.2 (2025-04-21)
 - Fixed installation menu logic
@@ -158,16 +164,16 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 - Updated all version references to 1.2
 
 ### v1.1 (2025-04-21)
-- **Nuevo**: Instalador automático (`install.sh`)
-- **Nuevo**: Desinstalador (`uninstall.sh`)
-- **Nuevo**: Script de diagnóstico (`joplin-mcp-doctor.sh`)
-- **Nuevo**: Detección automática de token desde Joplin settings
-- **Nuevo**: Validación de token durante instalación
-- **Nuevo**: Tests post-instalación
-- **Nuevo**: Backup automático de configuraciones
-- **Nuevo**: Sistema de logs
-- **Mejora**: Idempotencia en reinstalaciones
-- **Mejora**: Manejo de errores y recuperación
+- **New**: Automatic installer (`install.sh`)
+- **New**: Uninstaller (`uninstall.sh`)
+- **New**: Diagnostic script (`joplin-mcp-doctor.sh`)
+- **New**: Automatic token detection from Joplin settings
+- **New**: Token validation during installation
+- **New**: Post-installation tests
+- **New**: Automatic configuration backup
+- **New**: Logging system
+- **Improvement**: Idempotency on reinstallations
+- **Improvement**: Error handling and recovery
 
 ### v1.0 (2025-04-21)
 - Initial stable release
@@ -179,9 +185,9 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ## Security Notes
 
 - **Never commit your Joplin token to git**
-- El instalador guarda el token en `~/.joplin-mcp/run_mcp.sh` (solo accesible por tu usuario)
-- El repositorio solo contiene placeholders (`TOKEN_JOPLIN`)
-- Backups se guardan en `~/.joplin-mcp/backup/` (revisar permisos)
+- The installer saves the token in `~/.joplin-mcp/run_mcp.sh` (accessible only by your user)
+- The repository only contains placeholders (`TOKEN_JOPLIN`)
+- Backups are saved in `~/.joplin-mcp/backup/` (check permissions)
 
 ## License
 
@@ -189,12 +195,20 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 This project is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
+## Project Attribution
+
+This project is built on the following technologies:
+
+- **[JoplinApp](https://joplinapp.org/)** - The open source note-taking application
+- **[OpenCode](https://github.com/anomalyco/opencode)** - AI-powered code development framework
+- **[MCP Protocol](https://modelcontextprotocol.io/)** - Model Context Protocol version 2024-11-05
+
 ## Acknowledgments
 
 This project was developed with the assistance of:
 
 - **[DeepSeek](https://www.deepseek.com/)** - AI model used for code development, architecture design, and documentation
-- **[Kimi](https://kimi.moonshot.cn/)** - AI model used for code review, optimization, and testing
+- **[Kimi](https://kimi.moonshot.cn/)** - AI model used for code review, optimisation, and testing
 
 Special thanks to the open-source AI community for making tools like these accessible to developers.
 
@@ -209,6 +223,6 @@ Contributions are welcome! Please ensure:
 ## Support
 
 For issues or questions:
-1. Run `~/.joplin-mcp/joplin-mcp-doctor.sh` para diagnóstico
+1. Run `~/.joplin-mcp/joplin-mcp-doctor.sh` for diagnostics
 2. Check logs: `~/.joplin-mcp/logs/install.log`
 3. Open an issue on GitHub

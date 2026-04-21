@@ -10,23 +10,23 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo "========================================"
-echo "  Desinstalador de Joplin MCP"
+echo "  Joplin MCP Uninstaller"
 echo "========================================"
 echo ""
 
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo -e "${YELLOW}⚠${NC} Joplin MCP no parece estar instalado en $INSTALL_DIR"
+    echo -e "${YELLOW}⚠${NC} Joplin MCP does not appear to be installed in $INSTALL_DIR"
     exit 0
 fi
 
-echo "Se eliminará:"
-echo "  - Directorio: $INSTALL_DIR"
-echo "  - Configuración en: $CONFIG_DIR/opencode.json"
+echo "Will be removed:"
+echo "  - Directory: $INSTALL_DIR"
+echo "  - Configuration at: $CONFIG_DIR/opencode.json"
 echo ""
 
-read -p "¿Continuar? (s/n): " confirm
-if [ "$confirm" != "s" ]; then
-    echo "Cancelado"
+read -p "Continue? (y/n): " confirm
+if [ "$confirm" != "y" ]; then
+    echo "Cancelled"
     exit 0
 fi
 
@@ -34,12 +34,12 @@ fi
 backup_dir="$HOME/.joplin-mcp-backup-$(date +%Y%m%d_%H%M%S)"
 if [ -d "$INSTALL_DIR" ]; then
     cp -r "$INSTALL_DIR" "$backup_dir"
-    echo -e "${GREEN}✓${NC} Backup creado: $backup_dir"
+    echo -e "${GREEN}✓${NC} Backup created: $backup_dir"
 fi
 
 # Remove from opencode.json
 if [ -f "$CONFIG_DIR/opencode.json" ]; then
-    echo "Actualizando configuración de OpenCode..."
+    echo "Updating OpenCode configuration..."
     
     python3 << EOF
 import json
@@ -55,28 +55,28 @@ try:
         del config['mcp']['joplin']
         with open(config_file, 'w') as f:
             json.dump(config, f, indent=2)
-        print("✓ Configuración de joplin eliminada de opencode.json")
+        print("✓ Joplin configuration removed from opencode.json")
     else:
-        print("ℹ No se encontró configuración de joplin")
+        print("ℹ Joplin configuration not found")
         
 except Exception as e:
-    print(f"⚠ Error al actualizar opencode.json: {e}", file=sys.stderr)
+    print(f"⚠ Error updating opencode.json: {e}", file=sys.stderr)
     sys.exit(1)
 EOF
 fi
 
 # Remove installation directory
-echo "Eliminando $INSTALL_DIR..."
+echo "Removing $INSTALL_DIR..."
 rm -rf "$INSTALL_DIR"
 
 echo ""
 echo "========================================"
-echo -e "  ${GREEN}Desinstalación completada${NC}"
+echo -e "  ${GREEN}Uninstallation complete${NC}"
 echo "========================================"
 echo ""
-echo "Backup guardado en:"
+echo "Backup saved to:"
 echo "  $backup_dir"
 echo ""
-echo "Para reinstalar, ejecuta:"
+echo "To reinstall, run:"
 echo "  ./install.sh"
 echo "========================================"
