@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved `run_mcp.sh` as a template for installer generation
 - Enhanced error handling throughout
-- Better user feedback with colored output
+- Better user feedback with coloured output
 - More robust JSON manipulation using Python
 
 ### Security
