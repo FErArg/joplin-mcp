@@ -111,7 +111,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.0.0"
+                    "version": "1.2.0"
                 }
             }
         }

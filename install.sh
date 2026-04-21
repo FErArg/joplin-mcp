@@ -1,5 +1,5 @@
 #!/bin/bash
-# Joplin MCP Installer v1.1
+# Joplin MCP Installer v1.2
 # Instalador completo con validación, backup y tests
 
 set -e  # Exit on error
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.1"
+VERSION="1.2"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -144,11 +144,11 @@ check_joplin_installed() {
 check_existing_installation() {
     log "Verificando instalación previa..."
     
+    echo ""
+    echo "Selecciona una opción:"
+    
     if [ -d "$INSTALL_DIR" ]; then
         warning "Instalación previa detectada en $INSTALL_DIR"
-        
-        echo ""
-        echo "Selecciona una opción:"
         echo "1) Reinstalar (eliminar todo y volver a instalar)"
         echo "2) Actualizar (preservar configuración)"
         echo "3) Cancelar"
@@ -174,6 +174,25 @@ check_existing_installation() {
                 exit 1
                 ;;
         esac
+    else
+        echo "1) Instalar"
+        echo "2) Cancelar"
+        echo ""
+        read -p "Opción [1-2]: " choice
+        
+        case $choice in
+            1)
+                log "Procediendo con la instalación..."
+                ;;
+            2)
+                log "Instalación cancelada por el usuario"
+                exit 0
+                ;;
+            *)
+                error "Opción inválida"
+                exit 1
+                ;;
+        esac
     fi
 }
 
@@ -182,7 +201,13 @@ backup_existing() {
     mkdir -p "$BACKUP_DIR"
     
     if [ -d "$INSTALL_DIR" ]; then
-        cp -r "$INSTALL_DIR" "$BACKUP_DIR/"
+        # Excluir directorio backup para evitar copia recursiva infinita
+        if command -v rsync &>/dev/null; then
+            rsync -a --exclude="backup" "$INSTALL_DIR/" "$BACKUP_DIR/"
+        else
+            # Usar find y cp como alternativa sin rsync
+            find "$INSTALL_DIR" -mindepth 1 -maxdepth 1 ! -name "backup" -exec cp -r {} "$BACKUP_DIR/" \;
+        fi
         success "Backup de instalación guardado en: $BACKUP_DIR"
     fi
 }

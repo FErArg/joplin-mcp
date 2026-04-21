@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2] - 2025-04-21
+
+### Fixed
+- **Installation Menu Logic** (`install.sh`):
+  - Fixed menu to show "Instalar" option for fresh installations
+  - Now correctly differentiates between fresh install and existing installation
+  - Shows appropriate options based on installation state
+
+- **Backup Self-Copy Error** (`install.sh`):
+  - Fixed backup function trying to copy directory into itself
+  - Added exclusion of `backup/` directory during backup process
+  - Added fallback to `find` command when `rsync` is not available
+
+- **Version Consistency**:
+  - Updated all version references from v1.1 to v1.2
+  - Synchronized versions across: install.sh, server.py, joplin-mcp-doctor.sh, README.md
+
+- **Personal Information Removal**:
+  - Removed hardcoded personal path from `test_mcp.sh`
+  - Now uses `$(dirname "$0")` for portability
+
 ## [1.1] - 2025-04-21
 
 ### Added
@@ -81,6 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.1...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.2...HEAD
+[1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
 [1.1]: https://github.com/ferarg/joplin-mcp/compare/v1.0...v1.1
 [1.0]: https://github.com/ferarg/joplin-mcp/releases/tag/v1.0

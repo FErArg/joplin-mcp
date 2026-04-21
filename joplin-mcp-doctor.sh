@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo "========================================"
-echo "  Joplin MCP Doctor v1.1"
+echo "  Joplin MCP Doctor v1.2"
 echo "========================================"
 echo ""
 

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Test script para verificar el servidor MCP de Joplin
 
-cd /home/ferarg/Git/joplin-mcp
+# Cambiar al directorio del script
+cd "$(dirname "$0")"
 
 export JOPLIN_TOKEN="TOKEN_JOPLIN"
 export JOPLIN_PORT="41184"

@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.1-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.2-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -151,6 +151,11 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ```
 
 ## Changelog
+
+### v1.2 (2025-04-21)
+- Fixed installation menu logic
+- Fixed backup self-copy error
+- Updated all version references to 1.2
 
 ### v1.1 (2025-04-21)
 - **Nuevo**: Instalador automático (`install.sh`)
