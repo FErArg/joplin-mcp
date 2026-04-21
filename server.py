@@ -152,25 +152,49 @@ def create_note(title, body, notebook_id=None, tags=None):
     return f"Created note '{title}' (ID: {note_id})"
 
 
-def update_note(note_id, title=None, body=None, notebook_id=None):
-    """Updates an existing note."""
-    payload = {}
+def rename_note(note_id, new_title):
+    """Renames a note."""
+    if not new_title or not new_title.strip():
+        return "Error: New title cannot be empty."
     
-    if title is not None:
-        payload["title"] = title
-    if body is not None:
-        payload["body"] = body
-    if notebook_id is not None:
-        payload["parent_id"] = notebook_id
-    
-    if not payload:
-        return "No changes specified for update."
-    
+    payload = {"title": new_title.strip()}
     data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
     if "error" in data:
-        return f"Error updating note: {data['error']}"
+        return f"Error renaming note: {data['error']}"
     
-    return f"Updated note (ID: {note_id})"
+    return f"Renamed note to '{new_title}' (ID: {note_id})"
+
+
+def update_note_content(note_id, new_body):
+    """Updates a note's body content."""
+    if new_body is None:
+        return "Error: New body content must be specified."
+    
+    payload = {"body": new_body}
+    data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
+    if "error" in data:
+        return f"Error updating note content: {data['error']}"
+    
+    return f"Updated note content (ID: {note_id})"
+
+
+def move_note(note_id, target_notebook_id):
+    """Moves a note to a different notebook."""
+    if not target_notebook_id:
+        return "Error: Target notebook ID must be specified."
+    
+    # Verify target notebook exists
+    check = joplin_request(f"folders/{target_notebook_id}")
+    if "error" in check:
+        return f"Error: Target notebook not found (ID: {target_notebook_id})"
+    
+    payload = {"parent_id": target_notebook_id}
+    data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
+    if "error" in data:
+        return f"Error moving note: {data['error']}"
+    
+    notebook_name = check.get("title", "Unknown")
+    return f"Moved note to notebook '{notebook_name}' (ID: {note_id})"
 
 
 def delete_note(note_id):
@@ -328,17 +352,39 @@ TOOLS = [
         }
     },
     {
-        "name": "update_note",
-        "description": "Updates an existing note's title, body, or notebook location.",
+        "name": "rename_note",
+        "description": "Renames an existing note to a new title.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "note_id": {"type": "string", "description": "The ID of the note to rename"},
+                "new_title": {"type": "string", "description": "The new title for the note"}
+            },
+            "required": ["note_id", "new_title"]
+        }
+    },
+    {
+        "name": "update_note_content",
+        "description": "Updates the Markdown body content of an existing note.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "note_id": {"type": "string", "description": "The ID of the note to update"},
-                "title": {"type": "string", "description": "New title (optional)"},
-                "body": {"type": "string", "description": "New body content (optional)"},
-                "notebook_id": {"type": "string", "description": "New notebook ID to move to (optional)"}
+                "new_body": {"type": "string", "description": "The new Markdown content"}
             },
-            "required": ["note_id"]
+            "required": ["note_id", "new_body"]
+        }
+    },
+    {
+        "name": "move_note",
+        "description": "Moves a note to a different notebook.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "note_id": {"type": "string", "description": "The ID of the note to move"},
+                "target_notebook_id": {"type": "string", "description": "The ID of the destination notebook"}
+            },
+            "required": ["note_id", "target_notebook_id"]
         }
     },
     {
@@ -402,7 +448,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.7.0"
+                    "version": "1.8.0"
                 }
             }
         }
@@ -432,7 +478,7 @@ def handle_request(msg):
         elif tool_name == "list_notebooks":
             result_text = list_notebooks()
         
-        # New notebook management tools (v1.5)
+        # Notebook management tools (v1.8)
         elif tool_name == "create_notebook":
             result_text = create_notebook(
                 args.get("name", ""),
@@ -446,7 +492,7 @@ def handle_request(msg):
                 args.get("new_name", "")
             )
         
-        # New note management tools (v1.5)
+        # Note management tools (v1.8) - Specialised operations
         elif tool_name == "create_note":
             result_text = create_note(
                 args.get("title", ""),
@@ -454,17 +500,25 @@ def handle_request(msg):
                 args.get("notebook_id"),
                 args.get("tags", [])
             )
-        elif tool_name == "update_note":
-            result_text = update_note(
+        elif tool_name == "rename_note":
+            result_text = rename_note(
                 args.get("note_id", ""),
-                args.get("title"),
-                args.get("body"),
-                args.get("notebook_id")
+                args.get("new_title", "")
+            )
+        elif tool_name == "update_note_content":
+            result_text = update_note_content(
+                args.get("note_id", ""),
+                args.get("new_body", "")
+            )
+        elif tool_name == "move_note":
+            result_text = move_note(
+                args.get("note_id", ""),
+                args.get("target_notebook_id", "")
             )
         elif tool_name == "delete_note":
             result_text = delete_note(args.get("note_id", ""))
         
-        # Tag management tools (v1.5)
+        # Tag management tools (v1.8)
         elif tool_name == "add_tags_to_note":
             note_id = args.get("note_id", "")
             tags = args.get("tags", [])

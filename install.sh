@@ -1,5 +1,5 @@
 #!/bin/bash
-# Joplin MCP Installer v1.7
+# Joplin MCP Installer v1.8
 # Complete installer with validation, backup, and tests
 
 set -e  # Exit on error
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.7"
+VERSION="1.8"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -316,11 +316,11 @@ check_write_permissions() {
             curl -s -X DELETE "http://localhost:$port/folders/$folder_id?token=$token" > /dev/null 2>&1
         fi
         
-        success "Write permissions confirmed - Full v1.7 functionality available"
+        success "Write permissions confirmed - Full v1.8 functionality available"
         return 0
     else
         warning "Write permissions not available - Token may have read-only access"
-        warning "v1.7 features (create, update, delete) will not work"
+        warning "v1.8 features (create, update, delete) will not work"
         echo ""
         warning "To enable full functionality:"
         warning "  1. Check Joplin Web Clipper settings"
@@ -387,7 +387,7 @@ get_token() {
         prompt_for_token
     fi
     
-    # Check write permissions for v1.7 features
+    # Check write permissions for v1.8 features
     echo ""
     check_write_permissions "$TOKEN"
 }
@@ -558,13 +558,13 @@ test_mcp_tools() {
         tool_count=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('result',{}).get('tools',[])))" 2>/dev/null || echo "?")
         success "Number of tools: $tool_count"
         
-        # Verify v1.7 has 12 tools
+        # Verify v1.8 has 12 tools
         if [ "$tool_count" = "12" ]; then
-            success "All v1.7 tools present (12 tools)"
+            success "All v1.8 tools present (12 tools)"
         elif [ "$tool_count" = "3" ]; then
-            warning "Only v1.4 tools detected (3 tools). v1.7 has 12 tools."
+            warning "Only v1.4 tools detected (3 tools). v1.8 has 12 tools."
         else
-            warning "Unexpected tool count. Expected 12 for v1.7."
+            warning "Unexpected tool count. Expected 12 for v1.8."
         fi
         
         return 0

@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.7-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.8-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
-**v1.5 - 12 MCP Tools for Complete Joplin Management:**
+**v1.8 - 14 Specialised MCP Tools for Complete Joplin Management:**
 
 ### Read-Only Tools
 - **search_notes**: Search notes by keyword across all notebooks
@@ -16,17 +16,19 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 - **list_notebooks**: List all notebooks (folders) in Joplin
 - **list_tags**: List all tags in Joplin
 
-### Notebook Management (New in v1.5)
+### Notebook Management
 - **create_notebook**: Create new notebooks with optional nesting
 - **update_notebook**: Rename existing notebooks
 - **delete_notebook**: Permanently delete notebooks
 
-### Note Management (New in v1.5)
+### Note Management (Specialised in v1.8)
 - **create_note**: Create notes with title, body, and optional tags
-- **update_note**: Update note content or move to different notebook
+- **rename_note**: Explicitly rename notes with validation
+- **update_note_content**: Update Markdown body content only
+- **move_note**: Move notes between notebooks with validation
 - **delete_note**: Permanently delete individual notes
 
-### Tag Management (New in v1.5)
+### Tag Management
 - **add_tags_to_note**: Add tags to notes (creates if non-existent)
 - **remove_tags_from_note**: Remove tags from notes
 
@@ -169,6 +171,12 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 ```
 
 ## Changelog
+
+### v1.8 (2025-04-22)
+- **New**: Specialised note operations (rename, update content, move)
+- **Improved**: Input validation for all note operations
+- **Changed**: Replaced generic update_note with 3 specific tools
+- **Enhanced**: 14 MCP tools with clear single-purpose functions
 
 ### v1.5 (2025-04-21)
 - **Major**: Full CRUD operations for notebooks and notes

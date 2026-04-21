@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8] - 2025-04-22
+
+### Changed
+- **Specialised Note Operations**:
+  - Replaced generic `update_note` with three specialised tools:
+    - `rename_note(note_id, new_title)` - Explicitly renames notes with validation
+    - `update_note_content(note_id, new_body)` - Updates Markdown body only
+    - `move_note(note_id, target_notebook_id)` - Moves notes between notebooks with validation
+  - Each tool has clear, single-purpose functionality
+  - Better error messages for each operation type
+
+### Improved
+- **Note Management**:
+  - Input validation: Empty titles are rejected
+  - Notebook existence verification before moving notes
+  - Descriptive success messages showing old and new values
+  - Clear separation of concerns between operations
+
+### Technical
+- **Tool Clarity**: 14 specialised MCP tools (up from 12)
+- **Validation**: Pre-operation checks prevent errors
+- **Error Handling**: Specific error messages for each failure type
+
 ## [1.5] - 2025-04-21
 
 ### Added
@@ -176,7 +199,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.5...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8...HEAD
+[1.8]: https://github.com/ferarg/joplin-mcp/compare/v1.5...v1.8
 [1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5
 [1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
 [1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3

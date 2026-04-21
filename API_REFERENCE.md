@@ -1,13 +1,15 @@
 # API Reference
 
-Complete reference for all MCP tools available in Joplin MCP v1.5.
+Complete reference for all MCP tools available in Joplin MCP v1.8.
 
 ## Overview
 
-Joplin MCP provides **12 tools** for managing your Joplin notes through the Model Context Protocol:
+Joplin MCP provides **14 tools** for managing your Joplin notes through the Model Context Protocol:
 
-- **3 Read-Only Tools** (from v1.4): Search and read notes and notebooks
-- **9 Write Tools** (new in v1.5): Create, update, and delete notebooks, notes, and tags
+- **4 Read-Only Tools**: Search and read notes, notebooks, and tags
+- **10 Write Tools**: Create, update, rename, move, and delete notebooks, notes, and tags
+
+**v1.8 Update**: Note operations are now specialised into separate tools for clarity and precision.
 
 ---
 
@@ -231,43 +233,84 @@ Created note 'My New Note' (ID: note-id-789)
 
 ---
 
-### `update_note`
+### `rename_note`
 
-Updates an existing note's title, body, or notebook location.
+Renames an existing note to a new title. This is the preferred tool for changing a note's title.
+
+**Parameters:**
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `note_id` | string | Yes | The ID of the note to rename |
+| `new_title` | string | Yes | The new title for the note |
+
+**Returns:**
+```
+Renamed note to 'New Title' (ID: note-id-789)
+```
+
+**Example:**
+```json
+{
+  "name": "rename_note",
+  "arguments": {
+    "note_id": "note-id-789",
+    "new_title": "Updated Title"
+  }
+}
+```
+
+---
+
+### `update_note_content`
+
+Updates the Markdown body content of an existing note. Use this to modify the note's content without changing its title or location.
 
 **Parameters:**
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `note_id` | string | Yes | The ID of the note to update |
-| `title` | string | No | New title (optional) |
-| `body` | string | No | New body content (optional) |
-| `notebook_id` | string | No | New notebook ID to move to (optional) |
-
-**Note:** At least one of `title`, `body`, or `notebook_id` must be provided.
+| `new_body` | string | Yes | The new Markdown content |
 
 **Returns:**
 ```
-Updated note (ID: note-id-789)
+Updated note content (ID: note-id-789)
 ```
 
-**Update Title Example:**
+**Example:**
 ```json
 {
-  "name": "update_note",
+  "name": "update_note_content",
   "arguments": {
     "note_id": "note-id-789",
-    "title": "Updated Title"
+    "new_body": "# Updated Content\n\nThis is the new Markdown content..."
   }
 }
 ```
 
-**Move to Different Notebook:**
+---
+
+### `move_note`
+
+Moves a note to a different notebook. Verifies the target notebook exists before moving.
+
+**Parameters:**
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `note_id` | string | Yes | The ID of the note to move |
+| `target_notebook_id` | string | Yes | The ID of the destination notebook |
+
+**Returns:**
+```
+Moved note to notebook 'Target Notebook' (ID: note-id-789)
+```
+
+**Example:**
 ```json
 {
-  "name": "update_note",
+  "name": "move_note",
   "arguments": {
     "note_id": "note-id-789",
-    "notebook_id": "new-notebook-id"
+    "target_notebook_id": "target-notebook-id"
   }
 }
 ```
@@ -462,7 +505,7 @@ The following Joplin REST API endpoints are utilised:
 
 ## Version Compatibility
 
-- **Joplin MCP Version:** 1.5.0
+- **Joplin MCP Version:** 1.8.0
 - **MCP Protocol:** 2024-11-05
 - **Joplin Desktop:** 2.13+ (Web Clipper API)
 - **Python:** 3.9+
