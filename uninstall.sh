@@ -21,7 +21,7 @@ fi
 
 echo "Will be removed:"
 echo "  - Directory: $INSTALL_DIR"
-echo "  - Configuration at: $CONFIG_DIR/opencode.json"
+echo "  - Configuration at: $CONFIG_DIR/opencode.json or $CONFIG_DIR/opencode.jsonc"
 echo ""
 
 read -p "Continue? (y/n): " confirm
@@ -37,24 +37,229 @@ if [ -d "$INSTALL_DIR" ]; then
     echo -e "${GREEN}✓${NC} Backup created: $backup_dir"
 fi
 
-# Remove from opencode.json
-if [ -f "$CONFIG_DIR/opencode.json" ]; then
+# Remove from OpenCode config
+if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
     echo "Updating OpenCode configuration..."
     
-    python3 << EOF
+    CONFIG_FILE="$CONFIG_DIR/opencode.jsonc" python3 <<'EOF'
 import json
+import os
 import sys
+import re
 
-config_file = "$CONFIG_DIR/opencode.json"
+config_file = os.environ['CONFIG_FILE']
+
+def strip_jsonc(text):
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == '/' and nxt == '/':
+            i += 2
+            while i < len(text) and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if ch == '/' and nxt == '*':
+            i += 2
+            while i + 1 < len(text) and text[i:i + 2] != '*/':
+                i += 1
+            i += 2
+            continue
+
+        cleaned.append(ch)
+        i += 1
+
+    text = ''.join(cleaned)
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == ',':
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] in '}]':
+                i += 1
+                continue
+
+        cleaned.append(ch)
+        i += 1
+
+    return ''.join(cleaned)
 
 try:
-    with open(config_file, 'r') as f:
-        config = json.load(f)
+    with open(config_file, 'r', encoding='utf-8') as f:
+        raw = f.read()
+
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError:
+        config = json.loads(strip_jsonc(raw))
     
-    if 'mcp' in config and 'joplin' in config['mcp']:
-        del config['mcp']['joplin']
-        with open(config_file, 'w') as f:
+    if 'mcp' in config and 'joplin_mcp' in config['mcp']:
+        del config['mcp']['joplin_mcp']
+        with open(config_file, 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2)
+            f.write("\n")
+        print("✓ Joplin configuration removed from opencode.jsonc")
+    else:
+        print("ℹ Joplin configuration not found")
+        
+except Exception as e:
+    print(f"⚠ Error updating opencode.jsonc: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+elif [ -f "$CONFIG_DIR/opencode.json" ]; then
+    echo "Updating OpenCode configuration..."
+    
+    CONFIG_FILE="$CONFIG_DIR/opencode.json" python3 <<'EOF'
+import json
+import os
+import sys
+import re
+
+config_file = os.environ['CONFIG_FILE']
+
+def strip_jsonc(text):
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == '/' and nxt == '/':
+            i += 2
+            while i < len(text) and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if ch == '/' and nxt == '*':
+            i += 2
+            while i + 1 < len(text) and text[i:i + 2] != '*/':
+                i += 1
+            i += 2
+            continue
+
+        cleaned.append(ch)
+        i += 1
+
+    text = ''.join(cleaned)
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == ',':
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] in '}]':
+                i += 1
+                continue
+
+        cleaned.append(ch)
+        i += 1
+
+    return ''.join(cleaned)
+
+try:
+    with open(config_file, 'r', encoding='utf-8') as f:
+        raw = f.read()
+
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError:
+        config = json.loads(strip_jsonc(raw))
+    
+    if 'mcp' in config and 'joplin_mcp' in config['mcp']:
+        del config['mcp']['joplin_mcp']
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+            f.write("\n")
         print("✓ Joplin configuration removed from opencode.json")
     else:
         print("ℹ Joplin configuration not found")

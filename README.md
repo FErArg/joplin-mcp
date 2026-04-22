@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.8-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-2.1.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,29 +8,14 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
-**v1.8 - 14 Specialised MCP Tools for Complete Joplin Management:**
-
-### Read-Only Tools
+- **create_notebook**: Create notebooks directly from the MCP client
+- **create_note**: Add new Markdown notes to a specific notebook
+- **update_note**: Modify the title and/or body of an existing note
+- **delete_note**: Remove notes (optionally permanently) by ID
+- **delete_notebook**: Remove notebooks/folders (optionally permanently) by ID
 - **search_notes**: Search notes by keyword across all notebooks
 - **read_note**: Read full note content in Markdown format
 - **list_notebooks**: List all notebooks (folders) in Joplin
-- **list_tags**: List all tags in Joplin
-
-### Notebook Management
-- **create_notebook**: Create new notebooks with optional nesting
-- **update_notebook**: Rename existing notebooks
-- **delete_notebook**: Permanently delete notebooks
-
-### Note Management (Specialised in v1.8)
-- **create_note**: Create notes with title, body, and optional tags
-- **rename_note**: Explicitly rename notes with validation
-- **update_note_content**: Update Markdown body content only
-- **move_note**: Move notes between notebooks with validation
-- **delete_note**: Permanently delete individual notes
-
-### Tag Management
-- **add_tags_to_note**: Add tags to notes (creates if non-existent)
-- **remove_tags_from_note**: Remove tags from notes
 
 ## Installation
 
@@ -39,12 +24,43 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 ### Quick Installation
 
 ```bash
-git clone https://github.com/ferarg/joplin-mcp.git
-cd joplin-mcp
+git clone <repository-url> joplin-mcp-macos
+cd joplin-mcp-macos
 ./install.sh
 ```
 
 The automatic installer will detect your Joplin token, configure the environment, and validate the installation. For more options and manual configuration, consult [INSTALL.md](INSTALL.md).
+
+## macOS Compatibility
+
+This fork is specifically optimised for macOS compatibility while maintaining Linux support.
+
+### Requirements
+
+- **macOS 12.3+** (Monterey or later)
+- **Python 3.9+** (included with macOS 12.3+)
+- **Xcode Command Line Tools**:
+  ```bash
+  xcode-select --install
+  ```
+
+### macOS-Specific Features
+
+- ✅ Automatic Joplin detection at `~/Library/Application Support/Joplin/`
+- ✅ BSD-compatible commands (no GNU dependencies required)
+- ✅ Native Python 3.9+ support
+- ✅ Works with macOS-native tools (no Homebrew required)
+
+### What Works Differently on macOS
+
+| Feature | Linux (GNU) | macOS (BSD) |
+|---------|-------------|-------------|
+| Python version detection | Uses GNU grep | Uses Python directly |
+| Port checking | `netstat -tuln` | `netstat -an` |
+| Process detection | `pgrep -f` | `ps aux \| grep` |
+| File operations | GNU find extensions | POSIX shell globs |
+
+See [MACOS.md](MACOS.md) for detailed compatibility analysis.
 
 ## Available Tools
 
@@ -88,6 +104,45 @@ Result:
 - Work (ID: folder-abc)
 - Personal (ID: folder-def)
 - Research (ID: folder-ghi)
+```
+
+### create_notebook
+
+Create a new notebook in Joplin.
+
+**Input**: `{"title": "Projects"}`
+
+**Example**:
+```
+⚙ joplin_create_notebook [title="Projects"]
+Result:
+Libreta creada: Projects (ID: folder-xyz)
+```
+
+### create_note
+
+Create a new note inside an existing notebook.
+
+**Input**: `{"title": "Meeting Notes", "body": "# Agenda", "parent_id": "folder-xyz"}`
+
+**Example**:
+```
+⚙ joplin_create_note [title="Meeting Notes", parent_id="folder-xyz"]
+Result:
+Nota creada: Meeting Notes (ID: note-123)
+```
+
+### update_note
+
+Update the title and/or body of an existing note.
+
+**Input**: `{"note_id": "note-123", "title": "New Title"}`
+
+**Example**:
+```
+⚙ joplin_update_note [note_id="note-123", title="New Title"]
+Result:
+Nota actualizada (ID: note-123).
 ```
 
 ## Troubleshooting
@@ -138,6 +193,9 @@ ls -la ~/.joplin-mcp/backup/
 # Restore opencode configuration
 cp ~/.joplin-mcp/backup/20250121_143022/opencode.json.backup ~/.config/opencode/opencode.json
 
+# Or restore a JSONC config
+cp ~/.joplin-mcp/backup/20250121_143022/opencode.jsonc.backup ~/.config/opencode/opencode.jsonc
+
 # Or restore everything
 rm -rf ~/.joplin-mcp
 cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
@@ -148,7 +206,7 @@ cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
 ### Project Structure
 
 ```
-joplin-mcp/
+joplin-mcp-macos/
 ├── install.sh              # Main installer
 ├── uninstall.sh            # Uninstaller
 ├── joplin-mcp-doctor.sh    # Diagnostic script
@@ -172,24 +230,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 ## Changelog
 
-### v1.8 (2025-04-22)
-- **New**: Specialised note operations (rename, update content, move)
-- **Improved**: Input validation for all note operations
-- **Changed**: Replaced generic update_note with 3 specific tools
-- **Enhanced**: 14 MCP tools with clear single-purpose functions
+### v2.1.1 (2026-04-21)
+- Added MCP tools to create notebooks, create notes, and update existing note content
+- Refined Joplin request helper to support POST/PUT operations with JSON payloads
 
-### v1.5 (2025-04-21)
-- **Major**: Full CRUD operations for notebooks and notes
-- **New**: Create, update, delete notebooks (e.g., "WiKi_LLM")
-- **New**: Create, update, delete notes with Markdown support
-- **New**: Tag management (add, remove, list tags)
-- **Enhanced**: 12 MCP tools (from 3 in v1.4)
-- **Improved**: Better error handling and API coverage
-
-### v1.4 (2025-04-21)
-- Converted to Linux-only MCP server
-- Removed macOS and Windows compatibility code
-- Updated OS detection to Linux-only
+### v2.1 (2026-04-21)
+- Updated the project version to 2.1 across scripts, server metadata, and documentation
+- Refreshed repository references in the documentation for `joplin-mcp-macos`
 
 ### v1.3 (2025-04-21)
 - Complete translation to British English

@@ -44,8 +44,8 @@ The easiest and quickest way to install is using the automatic installer:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ferarg/joplin-mcp.git
-cd joplin-mcp
+git clone <repository-url> joplin-mcp-macos
+cd joplin-mcp-macos
 
 # 2. Run the installer
 ./install.sh
@@ -56,7 +56,7 @@ cd joplin-mcp
 The `install.sh` installer automates the entire process:
 
 1. **System verification**
-   - Detects Linux operating system (Linux-only support)
+   - Detects your operating system (Linux, macOS, Windows WSL)
    - Verifies you have Python 3.9+ installed
    - Checks dependencies (pip, curl)
 
@@ -72,7 +72,7 @@ The `install.sh` installer automates the entire process:
    - Generates the `run_mcp.sh` script with your token
 
 4. **OpenCode configuration**
-   - Performs **automatic backup** of `~/.config/opencode/opencode.json`
+   - Performs **automatic backup** of `~/.config/opencode/opencode.json` or `~/.config/opencode/opencode.jsonc`
    - Adds the Joplin MCP configuration
    - Preserves your existing configuration
 
@@ -95,8 +95,8 @@ mkdir -p ~/.joplin-mcp
 cd ~/.joplin-mcp
 
 # Copy necessary files from the cloned repository
-cp /path/to/repo/joplin-mcp/server.py .
-cp /path/to/repo/joplin-mcp/requirements.txt .
+cp /path/to/repo/joplin-mcp-macos/server.py .
+cp /path/to/repo/joplin-mcp-macos/requirements.txt .
 ```
 
 ### Step 2: Create Python virtual environment
@@ -145,17 +145,17 @@ chmod +x ~/.joplin-mcp/run_mcp.sh
 
 ### Step 5: Configure OpenCode manually
 
-Edit the file `~/.config/opencode/opencode.json`:
+Edit the file `~/.config/opencode/opencode.json` or `~/.config/opencode/opencode.jsonc`:
 
 ```bash
 # Create the directory if it doesn't exist
 mkdir -p ~/.config/opencode
 
-# Add configuration (if the file already exists, add only the mcp.joplin section)
+# Add configuration (if the file already exists, add only the mcp.joplin_mcp section)
 cat >> ~/.config/opencode/opencode.json << 'EOF'
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
@@ -182,12 +182,12 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 ### OpenCode
 
-The installer automatically configures `~/.config/opencode/opencode.json`:
+The installer automatically configures your existing `~/.config/opencode/opencode.jsonc` when present, otherwise `~/.config/opencode/opencode.json`:
 
 ```json
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
@@ -196,13 +196,15 @@ The installer automatically configures `~/.config/opencode/opencode.json`:
 }
 ```
 
+The installer preserves existing OpenCode settings and can merge into files that use JSONC features such as comments or trailing commas.
+
 If you need to configure it manually:
 
 ```bash
-# Add to ~/.config/opencode/opencode.json
+# Add to ~/.config/opencode/opencode.json or ~/.config/opencode/opencode.jsonc
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["~/.joplin-mcp/run_mcp.sh"],
       "enabled": true
@@ -251,7 +253,7 @@ Add to your configuration (`claude_desktop_config.json`):
 ~/.joplin-mcp/uninstall.sh
 
 # Reinstall or update
-cd /path/to/repo/joplin-mcp
+cd /path/to/repo/joplin-mcp-macos
 ./install.sh
 ```
 
@@ -267,7 +269,7 @@ cd /path/to/repo/joplin-mcp
 │   └── install.log
 ├── backup/               # Automatic backups
 │   └── 20250121_143022/
-│       ├── opencode.json.backup
+│       ├── opencode.json.backup / opencode.jsonc.backup
 │       └── joplin-settings.json.backup
 ├── joplin-mcp-doctor.sh  # Diagnostic script
 ├── uninstall.sh          # Uninstaller
@@ -289,7 +291,7 @@ To completely uninstall Joplin MCP:
 
 This script:
 1. Creates a backup of your current installation
-2. Removes the MCP entry from `~/.config/opencode/opencode.json`
+2. Removes the MCP entry from `~/.config/opencode/opencode.json` or `~/.config/opencode/opencode.jsonc`
 3. Removes the `~/.joplin-mcp/` directory
 4. Shows the backup location
 
@@ -297,7 +299,7 @@ This script:
 
 ```bash
 # 1. Remove OpenCode configuration
-# Edit ~/.config/opencode/opencode.json and remove the mcp.joplin section
+# Edit ~/.config/opencode/opencode.json or ~/.config/opencode/opencode.jsonc and remove the mcp.joplin_mcp section
 
 # 2. Remove installation directory
 rm -rf ~/.joplin-mcp
@@ -384,8 +386,12 @@ cat ~/.joplin-mcp/LATEST_BACKUP
 # Restore from a specific backup
 cp ~/.joplin-mcp/backup/20250121_143022/opencode.json.backup ~/.config/opencode/opencode.json
 
+# Or restore a JSONC config
+cp ~/.joplin-mcp/backup/20250121_143022/opencode.jsonc.backup ~/.config/opencode/opencode.jsonc
+
 # Or restore from the automatic uninstaller backup
-cp ~/.joplin-mcp-backup-*/opencode.json.backup ~/.config/opencode/opencode.json 2>/dev/null || echo "No automatic backup"
+cp ~/.joplin-mcp-backup-*/opencode.json.backup ~/.config/opencode/opencode.json 2>/dev/null || echo "No JSON backup"
+cp ~/.joplin-mcp-backup-*/opencode.jsonc.backup ~/.config/opencode/opencode.jsonc 2>/dev/null || echo "No JSONC backup"
 ```
 
 ### Restore complete installation

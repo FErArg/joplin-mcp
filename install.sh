@@ -1,5 +1,5 @@
 #!/bin/bash
-# Joplin MCP Installer v1.8
+# Joplin MCP Installer v2.1.1
 # Complete installer with validation, backup, and tests
 
 set -e  # Exit on error
@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.8"
+VERSION="2.1.1"
 
 # ============================================================
 # UTILITY FUNCTIONS
@@ -48,11 +48,12 @@ detect_os() {
     
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="linux"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        OS="macos"
+    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        OS="windows"
     else
         OS="unknown"
-        error "Unsupported operating system detected: $OSTYPE"
-        error "This MCP server is designed for Linux systems only"
-        exit 1
     fi
     
     success "Operating system detected: $OS"
@@ -68,7 +69,7 @@ check_system_deps() {
         error "Python 3 is not installed"
         deps_ok=false
     else
-        PYTHON_VERSION=$(python3 --version 2>&1 | grep -oP '\d+\.\d+')
+        PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
         success "Python 3 found: $PYTHON_VERSION"
         
         # Check version >= 3.9
@@ -115,6 +116,10 @@ check_joplin_installed() {
         # Flatpak
         joplin_found=true
         settings_path="$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
+    elif [ -d "$HOME/Library/Application Support/Joplin" ]; then
+        # macOS
+        joplin_found=true
+        settings_path="$HOME/Library/Application Support/Joplin/settings.json"
     fi
     
     if [ "$joplin_found" = true ]; then
@@ -122,12 +127,29 @@ check_joplin_installed() {
         
         # Check if Web Clipper might be enabled (check if port is in use)
         if command -v lsof &> /dev/null; then
-            if lsof -Pi :41184 -sTCP:LISTEN -t >/dev/null 2>&1 || \
-               netstat -tuln 2>/dev/null | grep -q ':41184'; then
+            # macOS-compatible lsof check
+            if lsof -i :41184 2>/dev/null | grep -i listen >/dev/null 2>&1; then
                 success "Web Clipper appears to be enabled (port 41184)"
             else
                 warning "Web Clipper not detected on port 41184"
                 warning "Ensure you enable it in Joplin: Options > Web Clipper > Enable Web Clipper"
+            fi
+        elif command -v netstat &> /dev/null; then
+            # OS-specific netstat check
+            if [ "$OS" = "macos" ]; then
+                if netstat -an 2>/dev/null | grep -q "\.41184.*LISTEN"; then
+                    success "Web Clipper appears to be enabled (port 41184)"
+                else
+                    warning "Web Clipper not detected on port 41184"
+                    warning "Ensure you enable it in Joplin: Options > Web Clipper > Enable Web Clipper"
+                fi
+            else
+                if netstat -tuln 2>/dev/null | grep -q ':41184'; then
+                    success "Web Clipper appears to be enabled (port 41184)"
+                else
+                    warning "Web Clipper not detected on port 41184"
+                    warning "Ensure you enable it in Joplin: Options > Web Clipper > Enable Web Clipper"
+                fi
             fi
         fi
     else
@@ -155,6 +177,7 @@ check_existing_installation() {
                 log "Performing complete reinstall..."
                 backup_existing
                 rm -rf "$INSTALL_DIR"
+                mkdir -p "$INSTALL_DIR/logs"
                 ;;
             2)
                 log "Updating existing installation..."
@@ -200,8 +223,12 @@ backup_existing() {
         if command -v rsync &>/dev/null; then
             rsync -a --exclude="backup" "$INSTALL_DIR/" "$BACKUP_DIR/"
         else
-            # Use find and cp as alternative without rsync
-            find "$INSTALL_DIR" -mindepth 1 -maxdepth 1 ! -name "backup" -exec cp -r {} "$BACKUP_DIR/" \;
+            # POSIX-compatible alternative without GNU find extensions
+            for item in "$INSTALL_DIR"/*; do
+                if [ -e "$item" ] && [ "$(basename "$item")" != "backup" ]; then
+                    cp -r "$item" "$BACKUP_DIR/"
+                fi
+            done
         fi
         success "Installation backup saved to: $BACKUP_DIR"
     fi
@@ -216,8 +243,11 @@ backup_config() {
     
     mkdir -p "$BACKUP_DIR"
     
-    # Backup opencode.json
-    if [ -f "$CONFIG_DIR/opencode.json" ]; then
+    # Backup the active OpenCode config file
+    if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
+        cp "$CONFIG_DIR/opencode.jsonc" "$BACKUP_DIR/opencode.jsonc.backup"
+        success "Backup of opencode.jsonc created"
+    elif [ -f "$CONFIG_DIR/opencode.json" ]; then
         cp "$CONFIG_DIR/opencode.json" "$BACKUP_DIR/opencode.json.backup"
         success "Backup of opencode.json created"
     fi
@@ -244,6 +274,7 @@ search_joplin_token() {
     local settings_files=(
         "$JOPLIN_CONFIG_DIR/settings.json"
         "$HOME/.var/app/net.cozic.joplin_desktop/config/joplin-desktop/settings.json"
+        "$HOME/Library/Application Support/Joplin/settings.json"
     )
     
     for settings_file in "${settings_files[@]}"; do
@@ -290,42 +321,6 @@ validate_token() {
         return 0
     else
         error "Invalid token or Joplin not responding"
-        return 1
-    fi
-}
-
-check_write_permissions() {
-    local token=$1
-    local port=${JOPLIN_PORT:-41184}
-    
-    log "Checking write permissions..."
-    
-    # Try to create a test notebook
-    local test_name="MCP_Test_$(date +%s)"
-    local response
-    response=$(curl -s -X POST "http://localhost:$port/folders?token=$token" \
-        -H "Content-Type: application/json" \
-        -d "{\"title\":\"$test_name\"}" 2>/dev/null || echo "")
-    
-    if echo "$response" | grep -q '"id"'; then
-        # Successfully created, now delete it
-        local folder_id
-        folder_id=$(echo "$response" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
-        
-        if [ -n "$folder_id" ]; then
-            curl -s -X DELETE "http://localhost:$port/folders/$folder_id?token=$token" > /dev/null 2>&1
-        fi
-        
-        success "Write permissions confirmed - Full v1.8 functionality available"
-        return 0
-    else
-        warning "Write permissions not available - Token may have read-only access"
-        warning "v1.8 features (create, update, delete) will not work"
-        echo ""
-        warning "To enable full functionality:"
-        warning "  1. Check Joplin Web Clipper settings"
-        warning "  2. Ensure token has full API access"
-        echo ""
         return 1
     fi
 }
@@ -386,10 +381,6 @@ get_token() {
     if [ "$confirm" != "y" ]; then
         prompt_for_token
     fi
-    
-    # Check write permissions for v1.8 features
-    echo ""
-    check_write_permissions "$TOKEN"
 }
 
 # ============================================================
@@ -424,20 +415,6 @@ install_files() {
     
     # Create version file
     echo "$VERSION" > "$INSTALL_DIR/VERSION"
-    
-    # Verify VERSION file was created correctly
-    if [ -f "$INSTALL_DIR/VERSION" ]; then
-        installed_version=$(cat "$INSTALL_DIR/VERSION" 2>/dev/null || echo "unknown")
-        if [ "$installed_version" = "$VERSION" ]; then
-            success "Version file created: $installed_version"
-        else
-            error "Version file mismatch: expected $VERSION, got $installed_version"
-            exit 1
-        fi
-    else
-        error "Failed to create VERSION file"
-        exit 1
-    fi
     
     success "Files installed to: $INSTALL_DIR"
 }
@@ -490,43 +467,133 @@ configure_opencode() {
     log "Configuring OpenCode..."
     
     local config_file="$CONFIG_DIR/opencode.json"
+    if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
+        config_file="$CONFIG_DIR/opencode.jsonc"
+    fi
     
     # Create config directory if needed
     mkdir -p "$CONFIG_DIR"
     
-    # Create or update config using Python for safe JSON manipulation
-    python3 << EOF
+    # Create or update config using Python while tolerating JSONC syntax.
+    CONFIG_FILE="$config_file" INSTALL_DIR="$INSTALL_DIR" python3 <<'EOF'
 import json
 import os
+import re
 
-config_file = "$config_file"
-install_dir = "$INSTALL_DIR"
+config_file = os.environ['CONFIG_FILE']
+install_dir = os.environ['INSTALL_DIR']
 
-# Load existing config or create new
+def strip_jsonc(text):
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == '/' and nxt == '/':
+            i += 2
+            while i < len(text) and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if ch == '/' and nxt == '*':
+            i += 2
+            while i + 1 < len(text) and text[i:i + 2] != '*/':
+                i += 1
+            i += 2
+            continue
+
+        cleaned.append(ch)
+        i += 1
+
+    text = ''.join(cleaned)
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == ',':
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] in '}]':
+                i += 1
+                continue
+
+        cleaned.append(ch)
+        i += 1
+
+    return ''.join(cleaned)
+
+config = {}
 if os.path.exists(config_file):
+    with open(config_file, 'r', encoding='utf-8') as f:
+        raw = f.read()
+
     try:
-        with open(config_file, 'r') as f:
-            config = json.load(f)
+        config = json.loads(raw)
     except json.JSONDecodeError:
-        print(f"Warning: {config_file} has invalid format, creating new")
-        config = {}
-else:
-    config = {}
+        try:
+            config = json.loads(strip_jsonc(raw))
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"Error: could not parse {config_file}: {exc}")
 
 # Ensure mcp section exists
 if 'mcp' not in config:
     config['mcp'] = {}
 
-# Add/update joplin configuration
-config['mcp']['joplin'] = {
+# Add/update the dedicated Joplin MCP configuration without
+# colliding with other generic Joplin integrations.
+config['mcp']['joplin_mcp'] = {
     'type': 'local',
     'command': [f'{install_dir}/run_mcp.sh'],
     'enabled': True
 }
 
 # Write config back
-with open(config_file, 'w') as f:
+with open(config_file, 'w', encoding='utf-8') as f:
     json.dump(config, f, indent=2)
+    f.write('\n')
 
 print(f"Configuration updated: {config_file}")
 EOF
@@ -571,15 +638,6 @@ test_mcp_tools() {
         local tool_count
         tool_count=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('result',{}).get('tools',[])))" 2>/dev/null || echo "?")
         success "Number of tools: $tool_count"
-        
-        # Verify v1.8 has 14 tools
-        if [ "$tool_count" = "14" ]; then
-            success "All v1.8 tools present (14 tools)"
-        elif [ "$tool_count" = "3" ]; then
-            warning "Only v1.4 tools detected (3 tools). v1.8 has 14 tools."
-        else
-            warning "Unexpected tool count: $tool_count. Expected 14 for v1.8."
-        fi
         
         return 0
     else
@@ -697,22 +755,219 @@ backup_dir="$HOME/.joplin-mcp-backup-$(date +%Y%m%d_%H%M%S)"
 cp -r "$INSTALL_DIR" "$backup_dir"
 echo "Backup created: $backup_dir"
 
-# Remove from opencode.json
-if [ -f "$CONFIG_DIR/opencode.json" ]; then
-    python3 << PYEOF
+# Remove from OpenCode config
+if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
+    CONFIG_FILE="$CONFIG_DIR/opencode.jsonc" python3 <<'PYEOF'
 import json
 import os
+import re
 
-config_file = "$CONFIG_DIR/opencode.json"
+config_file = os.environ['CONFIG_FILE']
+
+def strip_jsonc(text):
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == '/' and nxt == '/':
+            i += 2
+            while i < len(text) and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if ch == '/' and nxt == '*':
+            i += 2
+            while i + 1 < len(text) and text[i:i + 2] != '*/':
+                i += 1
+            i += 2
+            continue
+
+        cleaned.append(ch)
+        i += 1
+
+    text = ''.join(cleaned)
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == ',':
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] in '}]':
+                i += 1
+                continue
+
+        cleaned.append(ch)
+        i += 1
+
+    return ''.join(cleaned)
 
 try:
-    with open(config_file, 'r') as f:
-        config = json.load(f)
-    
-    if 'mcp' in config and 'joplin' in config['mcp']:
-        del config['mcp']['joplin']
-        with open(config_file, 'w') as f:
+    with open(config_file, 'r', encoding='utf-8') as f:
+        raw = f.read()
+
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError:
+        config = json.loads(strip_jsonc(raw))
+
+    if 'mcp' in config and 'joplin_mcp' in config['mcp']:
+        del config['mcp']['joplin_mcp']
+        with open(config_file, 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2)
+            f.write("\n")
+        print("OpenCode configuration updated")
+except Exception as e:
+    print(f"Error updating opencode.jsonc: {e}")
+PYEOF
+elif [ -f "$CONFIG_DIR/opencode.json" ]; then
+    CONFIG_FILE="$CONFIG_DIR/opencode.json" python3 <<'PYEOF'
+import json
+import os
+import re
+
+config_file = os.environ['CONFIG_FILE']
+
+def strip_jsonc(text):
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+        nxt = text[i + 1] if i + 1 < len(text) else ''
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == '/' and nxt == '/':
+            i += 2
+            while i < len(text) and text[i] not in '\r\n':
+                i += 1
+            continue
+
+        if ch == '/' and nxt == '*':
+            i += 2
+            while i + 1 < len(text) and text[i:i + 2] != '*/':
+                i += 1
+            i += 2
+            continue
+
+        cleaned.append(ch)
+        i += 1
+
+    text = ''.join(cleaned)
+    cleaned = []
+    in_string = False
+    escape = False
+    i = 0
+
+    while i < len(text):
+        ch = text[i]
+
+        if in_string:
+            cleaned.append(ch)
+            if escape:
+                escape = False
+            elif ch == '\\':
+                escape = True
+            elif ch == '"':
+                in_string = False
+            i += 1
+            continue
+
+        if ch == '"':
+            in_string = True
+            cleaned.append(ch)
+            i += 1
+            continue
+
+        if ch == ',':
+            j = i + 1
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] in '}]':
+                i += 1
+                continue
+
+        cleaned.append(ch)
+        i += 1
+
+    return ''.join(cleaned)
+
+try:
+    with open(config_file, 'r', encoding='utf-8') as f:
+        raw = f.read()
+
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError:
+        config = json.loads(strip_jsonc(raw))
+    
+    if 'mcp' in config and 'joplin_mcp' in config['mcp']:
+        del config['mcp']['joplin_mcp']
+        with open(config_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+            f.write("\n")
         print("OpenCode configuration updated")
 except Exception as e:
     print(f"Error updating opencode.json: {e}")
@@ -741,7 +996,11 @@ show_summary() {
     echo "========================================"
     echo ""
     echo "📁 Location:      $INSTALL_DIR"
-    echo "⚙️  Configuration: $CONFIG_DIR/opencode.json"
+    if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
+        echo "⚙️  Configuration: $CONFIG_DIR/opencode.jsonc"
+    else
+        echo "⚙️  Configuration: $CONFIG_DIR/opencode.json"
+    fi
     echo "🔑 Token:         Configured ✓"
     echo "✅ Tests:         Passed ✓"
     echo ""
@@ -779,6 +1038,8 @@ show_error_help() {
     echo ""
     echo "5. Restore backup:"
     echo "   cp $BACKUP_DIR/opencode.json.backup ~/.config/opencode/opencode.json"
+    echo "   # or if you use JSONC"
+    echo "   cp $BACKUP_DIR/opencode.jsonc.backup ~/.config/opencode/opencode.jsonc"
     echo ""
     echo "6. To reinstall:"
     echo "   ./install.sh"
@@ -815,12 +1076,12 @@ main() {
     # Phase 4: Install
     install_files
     generate_wrapper_script
-    install_python_deps
     
-    # Phase 5: Configure
+    # Phase 5: Configure OpenCode before dependency installation so the MCP entry is written even if pip later fails.
     configure_opencode
     
-    # Phase 6: Create helpers
+    # Phase 6: Install dependencies and helpers
+    install_python_deps
     create_helper_scripts
     
     # Phase 7: Test

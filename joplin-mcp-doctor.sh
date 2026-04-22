@@ -11,8 +11,15 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Detect OS for macOS compatibility
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OS="macos"
+else
+    OS="linux"
+fi
+
 echo "========================================"
-echo "  Joplin MCP Doctor v1.8"
+echo "  Joplin MCP Doctor v2.1.1"
 echo "========================================"
 echo ""
 
@@ -64,24 +71,44 @@ echo -e "${BLUE}Checking Joplin:${NC}"
 port="${JOPLIN_PORT:-41184}"
 
 # Check if Joplin process is running
-if pgrep -f "joplin" > /dev/null 2>&1 || pgrep -f "Joplin" > /dev/null 2>&1; then
-    echo -e "  ${GREEN}✓${NC} Joplin process detected"
+if [ "$OS" = "macos" ]; then
+    # macOS: use ps aux since pgrep -f is not supported
+    if ps aux | grep -i "[j]oplin" > /dev/null 2>&1; then
+        echo -e "  ${GREEN}✓${NC} Joplin process detected"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Joplin process not detected"
+    fi
 else
-    echo -e "  ${YELLOW}⚠${NC} Joplin process not detected"
+    # Linux: use pgrep -f
+    if pgrep -f "joplin" > /dev/null 2>&1 || pgrep -f "Joplin" > /dev/null 2>&1; then
+        echo -e "  ${GREEN}✓${NC} Joplin process detected"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Joplin process not detected"
+    fi
 fi
 
 # Check if port is listening
 if command -v lsof &> /dev/null; then
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    # macOS-compatible lsof check (without -sTCP:LISTEN)
+    if lsof -i :$port 2>/dev/null | grep -i listen >/dev/null 2>&1; then
         echo -e "  ${GREEN}✓${NC} Port $port is listening"
     else
         echo -e "  ${YELLOW}⚠${NC} Port $port is not listening"
     fi
 elif command -v netstat &> /dev/null; then
-    if netstat -tuln 2>/dev/null | grep -q ":$port"; then
-        echo -e "  ${GREEN}✓${NC} Port $port is listening"
+    # OS-specific netstat check
+    if [ "$OS" = "macos" ]; then
+        if netstat -an 2>/dev/null | grep -q "\.$port.*LISTEN"; then
+            echo -e "  ${GREEN}✓${NC} Port $port is listening"
+        else
+            echo -e "  ${YELLOW}⚠${NC} Port $port is not listening"
+        fi
     else
-        echo -e "  ${YELLOW}⚠${NC} Port $port is not listening"
+        if netstat -tuln 2>/dev/null | grep -q ":$port"; then
+            echo -e "  ${GREEN}✓${NC} Port $port is listening"
+        else
+            echo -e "  ${YELLOW}⚠${NC} Port $port is not listening"
+        fi
     fi
 else
     echo -e "  ${YELLOW}⚠${NC} Cannot verify port (install lsof or netstat)"
@@ -140,16 +167,23 @@ fi
 # Check OpenCode config
 echo ""
 echo -e "${BLUE}Checking OpenCode configuration:${NC}"
-if [ -f "$CONFIG_DIR/opencode.json" ]; then
-    if grep -q '"joplin"' "$CONFIG_DIR/opencode.json"; then
+if [ -f "$CONFIG_DIR/opencode.jsonc" ]; then
+    if grep -q '"joplin_mcp"' "$CONFIG_DIR/opencode.jsonc"; then
+        echo -e "  ${GREEN}✓${NC} Joplin configuration found in opencode.jsonc"
+    else
+        echo -e "  ${YELLOW}⚠${NC} Joplin configuration not found"
+        echo "     Run ./install.sh to configure"
+    fi
+elif [ -f "$CONFIG_DIR/opencode.json" ]; then
+    if grep -q '"joplin_mcp"' "$CONFIG_DIR/opencode.json"; then
         echo -e "  ${GREEN}✓${NC} Joplin configuration found in opencode.json"
     else
         echo -e "  ${YELLOW}⚠${NC} Joplin configuration not found"
         echo "     Run ./install.sh to configure"
     fi
 else
-    echo -e "  ${YELLOW}⚠${NC} opencode.json not found"
-    echo "     Typical configuration at: $CONFIG_DIR/opencode.json"
+    echo -e "  ${YELLOW}⚠${NC} OpenCode config not found"
+    echo "     Typical configuration at: $CONFIG_DIR/opencode.json or $CONFIG_DIR/opencode.jsonc"
 fi
 
 # Show backup info

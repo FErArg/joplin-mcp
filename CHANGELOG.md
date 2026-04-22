@@ -7,80 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.8] - 2025-04-22
-
-### Changed
-- **Specialised Note Operations**:
-  - Replaced generic `update_note` with three specialised tools:
-    - `rename_note(note_id, new_title)` - Explicitly renames notes with validation
-    - `update_note_content(note_id, new_body)` - Updates Markdown body only
-    - `move_note(note_id, target_notebook_id)` - Moves notes between notebooks with validation
-  - Each tool has clear, single-purpose functionality
-  - Better error messages for each operation type
-
-### Improved
-- **Note Management**:
-  - Input validation: Empty titles are rejected
-  - Notebook existence verification before moving notes
-  - Descriptive success messages showing old and new values
-  - Clear separation of concerns between operations
-
-### Technical
-- **Tool Clarity**: 14 specialised MCP tools (up from 12)
-- **Validation**: Pre-operation checks prevent errors
-- **Error Handling**: Specific error messages for each failure type
-
-## [1.5] - 2025-04-21
+## [2.1.1] - 2026-04-21
 
 ### Added
-- **Full CRUD Operations for Notebooks**:
-  - `create_notebook(name, parent_id)` - Creates new notebooks with optional nesting
-  - `delete_notebook(notebook_id)` - Permanently deletes notebooks and their contents
-  - `update_notebook(notebook_id, new_name)` - Renames existing notebooks
-  - Enables creation of structured notebook hierarchies like "WiKi_LLM"
-
-- **Full CRUD Operations for Notes**:
-  - `create_note(title, body, notebook_id, tags)` - Creates notes with optional placement and tags
-  - `update_note(note_id, title, body, notebook_id)` - Updates note content or location
-  - `delete_note(note_id)` - Permanently deletes individual notes
-  - Supports Markdown content and tag associations
-
-- **Tag Management System**:
-  - `add_tags_to_note(note_id, tags)` - Adds multiple tags to notes (creates if non-existent)
-  - `remove_tags_from_note(note_id, tags)` - Removes specified tags from notes
-  - `list_tags()` - Displays all tags in Joplin
-  - Automatic tag creation and association handling
-
-- **Enhanced API Infrastructure**:
-  - Refactored `joplin_request()` to support POST, PUT, DELETE operations
-  - Improved error handling with specific HTTP error codes and messages
-  - Better debug logging for all API operations
-  - Maintains backward compatibility with all v1.4 tools
+- MCP tools `create_notebook`, `create_note`, and `update_note` to manage notebooks and notes directly from clients
+- MCP tools `delete_note` and `delete_notebook` to remove notes and notebooks (with optional permanent deletes)
 
 ### Changed
-- **Expanded Tool Set**: From 3 tools to 12 tools (300% increase in functionality)
-- **Improved Error Messages**: More descriptive errors for API failures and validation issues
-- **British English Consistency**: All new tool descriptions use British spelling and terminology
+- Refactored `server.py` request helper to support POST/PUT operations with JSON payloads
 
-### Technical
-- **Code Organisation**: Modular function structure for better maintainability
-- **API Coverage**: Complete coverage of Joplin REST API for folders, notes, and tags
-- **Input Validation**: Schema-based validation for all new tools via MCP protocol
-
-## [1.4] - 2025-04-21
+## [2.1] - 2026-04-21
 
 ### Changed
-- **Converted to Linux-Only MCP Server**:
-  - Removed macOS detection (`darwin*`) from `install.sh`
-  - Removed Windows detection (`msys`, `cygwin`) from `install.sh`
-  - Eliminated macOS Joplin path (`~/Library/Application Support/Joplin/`)
-  - Updated OS detection to Linux-only with explicit error for unsupported systems
-  - Updated documentation to reflect Linux-only support
-
-### Removed
-- Cross-platform compatibility code for macOS and Windows
-- macOS-specific Joplin configuration paths
-- Windows WSL support references
+- Updated the project version from 1.3 to 2.1 across `install.sh`, `server.py`, `joplin-mcp-doctor.sh`, and `README.md`
+- Refreshed repository references in `README.md` and `INSTALL.md` to use `joplin-mcp-macos`
 
 ## [1.3] - 2025-04-21
 
@@ -129,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Automated Installer** (`install.sh`) - Complete installation automation with:
-  - OS detection (Linux only)
+  - OS detection (Linux, macOS, Windows WSL)
   - Dependency checking (Python 3.9+, pip, curl)
   - Automatic token detection from Joplin settings
   - Interactive token prompt with validation
@@ -198,12 +138,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Token placeholder in repository (`TOKEN_JOPLIN`)
 - User configures token locally in wrapper script
 - No sensitive data in git history
-
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8...HEAD
-[1.8]: https://github.com/ferarg/joplin-mcp/compare/v1.5...v1.8
-[1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5
-[1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
-[1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3
-[1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
-[1.1]: https://github.com/ferarg/joplin-mcp/compare/v1.0...v1.1
-[1.0]: https://github.com/ferarg/joplin-mcp/releases/tag/v1.0

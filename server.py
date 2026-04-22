@@ -4,273 +4,166 @@ import urllib.request
 import urllib.parse
 import os
 
-# Configuration
+# Configuración base
 JOPLIN_TOKEN = os.environ.get("JOPLIN_TOKEN")
 JOPLIN_PORT = os.environ.get("JOPLIN_PORT", "41184")
 BASE_URL = f"http://localhost:{JOPLIN_PORT}"
 
-
 def joplin_request(endpoint, query_params=None, method="GET", data=None):
-    """Makes a request to the Joplin API."""
     if not JOPLIN_TOKEN:
         sys.stderr.write("WARNING: JOPLIN_TOKEN is empty or not set\n")
-    
-    if query_params is None:
-        query_params = {}
-    query_params['token'] = JOPLIN_TOKEN
-    
-    query_string = urllib.parse.urlencode(query_params)
+
+    params = dict(query_params or {})
+    params['token'] = JOPLIN_TOKEN
+
+    query_string = urllib.parse.urlencode(params)
     url = f"{BASE_URL}/{endpoint}?{query_string}"
-    
-    if method == "GET":
-        sys.stderr.write(f"DEBUG: GET {BASE_URL}/{endpoint}\n")
-    else:
-        sys.stderr.write(f"DEBUG: {method} {BASE_URL}/{endpoint}\n")
+    sys.stderr.write(
+        f"DEBUG: {method} {BASE_URL}/{endpoint} (token length: {len(JOPLIN_TOKEN) if JOPLIN_TOKEN else 0})\n"
+    )
     
     try:
-        headers = {"Content-Type": "application/json"}
-        
+        headers = {}
+        payload = None
+
         if data is not None:
-            json_data = json.dumps(data).encode('utf-8')
-            req = urllib.request.Request(url, data=json_data, headers=headers, method=method)
-        else:
-            req = urllib.request.Request(url, headers=headers, method=method)
-        
+            payload = json.dumps(data).encode('utf-8')
+            headers['Content-Type'] = 'application/json'
+
+        req = urllib.request.Request(url, data=payload, headers=headers, method=method)
         with urllib.request.urlopen(req) as response:
-            response_data = response.read().decode('utf-8')
-            if response_data:
-                return json.loads(response_data)
-            return {}
-    except urllib.error.HTTPError as e:
-        error_msg = f"HTTP {e.code}: {e.reason}"
-        try:
-            error_body = e.read().decode('utf-8')
-            if error_body:
-                error_msg += f" - {error_body}"
-        except:
-            pass
-        return {"error": error_msg}
+            raw = response.read()
+            if not raw:
+                return {}
+            text = raw.decode('utf-8').strip()
+            if not text:
+                return {}
+            return json.loads(text)
     except Exception as e:
         return {"error": str(e)}
 
-
 def search_notes(query):
-    """Searches notes in Joplin using a keyword."""
-    data = joplin_request("search", {"query": query, "type": "note"})
+    data = joplin_request("search", {"query": query})
     if "error" in data:
         return f"Error: {data['error']}"
     
     items = data.get("items", [])
     if not items:
-        return "No notes found."
+        return "No se encontraron notas."
     
     results = [f"- {item['title']} (ID: {item['id']})" for item in items]
     return "\n".join(results)
 
-
 def read_note(note_id):
-    """Reads the full Markdown content of a specific note."""
-    data = joplin_request(f"notes/{note_id}", {"fields": "id,title,body,parent_id"})
+    data = joplin_request(f"notes/{note_id}", {"fields": "id,title,body"})
     if "error" in data:
         return f"Error: {data['error']}"
     
-    title = data.get("title", "Untitled")
+    title = data.get("title", "Sin título")
     body = data.get("body", "")
-    parent_id = data.get("parent_id", "")
-    return f"# {title}\n\nNotebook ID: {parent_id}\n\n{body}"
-
+    return f"# {title}\n\n{body}"
 
 def list_notebooks():
-    """Obtains a list of all notebooks in Joplin."""
     data = joplin_request("folders")
     if "error" in data:
         return f"Error: {data['error']}"
     
     items = data.get("items", [])
     if not items:
-        return "No notebooks found."
+        return "No se encontraron libretas."
     
     results = [f"- {item['title']} (ID: {item['id']})" for item in items]
     return "\n".join(results)
 
+def create_notebook(title):
+    title = (title or "").strip()
+    if not title:
+        return "Error: El título de la libreta es obligatorio."
 
-def create_notebook(name, parent_id=None):
-    """Creates a new notebook in Joplin."""
-    payload = {"title": name}
-    if parent_id:
-        payload["parent_id"] = parent_id
-    
-    data = joplin_request("folders", method="POST", data=payload)
-    if "error" in data:
-        return f"Error creating notebook: {data['error']}"
-    
-    notebook_id = data.get("id", "unknown")
-    return f"Created notebook '{name}' (ID: {notebook_id})"
+    response = joplin_request("folders", method="POST", data={"title": title})
+    if "error" in response:
+        return f"Error: {response['error']}"
 
+    notebook_id = response.get("id", "desconocido")
+    return f"Libreta creada: {title} (ID: {notebook_id})"
 
-def delete_notebook(notebook_id):
-    """Deletes a notebook and all its notes."""
-    data = joplin_request(f"folders/{notebook_id}", method="DELETE")
-    if "error" in data:
-        return f"Error deleting notebook: {data['error']}"
-    
-    return f"Deleted notebook (ID: {notebook_id})"
+def create_note(title, body, parent_id):
+    parent_id = (parent_id or "").strip()
+    if not parent_id:
+        return "Error: Es necesario proporcionar el ID de la libreta (parent_id)."
 
+    title = (title or "").strip() or "Sin título"
+    body = body or ""
 
-def update_notebook(notebook_id, new_name):
-    """Updates a notebook's title."""
-    payload = {"title": new_name}
-    data = joplin_request(f"folders/{notebook_id}", method="PUT", data=payload)
-    if "error" in data:
-        return f"Error updating notebook: {data['error']}"
-    
-    return f"Updated notebook to '{new_name}' (ID: {notebook_id})"
+    response = joplin_request(
+        "notes",
+        method="POST",
+        data={
+            "title": title,
+            "body": body,
+            "parent_id": parent_id,
+        }
+    )
 
+    if "error" in response:
+        return f"Error: {response['error']}"
 
-def create_note(title, body, notebook_id=None, tags=None):
-    """Creates a new note in Joplin."""
-    payload = {
-        "title": title,
-        "body": body,
-        "source": "joplin-mcp"
-    }
-    
-    if notebook_id:
-        payload["parent_id"] = notebook_id
-    
-    data = joplin_request("notes", method="POST", data=payload)
-    if "error" in data:
-        return f"Error creating note: {data['error']}"
-    
-    note_id = data.get("id", "unknown")
-    
-    # Add tags if specified
-    if tags and isinstance(tags, list):
-        for tag in tags:
-            add_tag_to_note(note_id, tag)
-    
-    return f"Created note '{title}' (ID: {note_id})"
+    note_id = response.get("id", "desconocido")
+    return f"Nota creada: {title} (ID: {note_id})"
 
+def update_note(note_id, title=None, body=None):
+    note_id = (note_id or "").strip()
+    if not note_id:
+        return "Error: Es necesario proporcionar el ID de la nota."
 
-def rename_note(note_id, new_title):
-    """Renames a note."""
-    if not new_title or not new_title.strip():
-        return "Error: New title cannot be empty."
-    
-    payload = {"title": new_title.strip()}
-    data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
-    if "error" in data:
-        return f"Error renaming note: {data['error']}"
-    
-    return f"Renamed note to '{new_title}' (ID: {note_id})"
+    payload = {}
+    if title is not None:
+        payload["title"] = title
+    if body is not None:
+        payload["body"] = body
 
+    if not payload:
+        return "Error: Debes proporcionar al menos un campo a actualizar (title o body)."
 
-def update_note_content(note_id, new_body):
-    """Updates a note's body content."""
-    if new_body is None:
-        return "Error: New body content must be specified."
-    
-    payload = {"body": new_body}
-    data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
-    if "error" in data:
-        return f"Error updating note content: {data['error']}"
-    
-    return f"Updated note content (ID: {note_id})"
+    response = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
+    if "error" in response:
+        return f"Error: {response['error']}"
 
+    return f"Nota actualizada (ID: {note_id})."
 
-def move_note(note_id, target_notebook_id):
-    """Moves a note to a different notebook."""
-    if not target_notebook_id:
-        return "Error: Target notebook ID must be specified."
-    
-    # Verify target notebook exists
-    check = joplin_request(f"folders/{target_notebook_id}")
-    if "error" in check:
-        return f"Error: Target notebook not found (ID: {target_notebook_id})"
-    
-    payload = {"parent_id": target_notebook_id}
-    data = joplin_request(f"notes/{note_id}", method="PUT", data=payload)
-    if "error" in data:
-        return f"Error moving note: {data['error']}"
-    
-    notebook_name = check.get("title", "Unknown")
-    return f"Moved note to notebook '{notebook_name}' (ID: {note_id})"
+def delete_note(note_id, permanent=False):
+    note_id = (note_id or "").strip()
+    if not note_id:
+        return "Error: Es necesario proporcionar el ID de la nota."
 
+    params = {}
+    if permanent:
+        params["permanent"] = 1
 
-def delete_note(note_id):
-    """Deletes a note permanently."""
-    data = joplin_request(f"notes/{note_id}", method="DELETE")
-    if "error" in data:
-        return f"Error deleting note: {data['error']}"
-    
-    return f"Deleted note (ID: {note_id})"
+    response = joplin_request(f"notes/{note_id}", query_params=params, method="DELETE")
+    if isinstance(response, dict) and "error" in response:
+        return f"Error: {response['error']}"
 
+    estado = "permanentemente eliminada" if permanent else "eliminada"
+    return f"Nota {estado} (ID: {note_id})."
 
-def add_tag_to_note(note_id, tag_name):
-    """Adds a tag to a note. Creates the tag if it doesn't exist."""
-    # First, check if tag exists
-    tags_data = joplin_request("tags", {"query": tag_name})
-    tag_id = None
-    
-    if "items" in tags_data:
-        for tag in tags_data["items"]:
-            if tag.get("title") == tag_name:
-                tag_id = tag.get("id")
-                break
-    
-    # Create tag if it doesn't exist
-    if not tag_id:
-        create_response = joplin_request("tags", method="POST", data={"title": tag_name})
-        if "error" in create_response:
-            return f"Error creating tag: {create_response['error']}"
-        tag_id = create_response.get("id")
-    
-    # Add tag to note
-    add_response = joplin_request(f"notes/{note_id}/tags", method="POST", data={"id": tag_id})
-    if "error" in add_response:
-        return f"Error adding tag: {add_response['error']}"
-    
-    return f"Added tag '{tag_name}' to note (ID: {note_id})"
+def delete_notebook(notebook_id, permanent=False):
+    notebook_id = (notebook_id or "").strip()
+    if not notebook_id:
+        return "Error: Es necesario proporcionar el ID de la libreta."
 
+    params = {}
+    if permanent:
+        params["permanent"] = 1
 
-def remove_tag_from_note(note_id, tag_name):
-    """Removes a tag from a note."""
-    # Find the tag
-    tags_data = joplin_request(f"notes/{note_id}/tags")
-    tag_id = None
-    
-    if "items" in tags_data:
-        for tag in tags_data["items"]:
-            if tag.get("title") == tag_name:
-                tag_id = tag.get("id")
-                break
-    
-    if not tag_id:
-        return f"Tag '{tag_name}' not found on this note."
-    
-    # Remove tag from note
-    data = joplin_request(f"notes/{note_id}/tags/{tag_id}", method="DELETE")
-    if "error" in data:
-        return f"Error removing tag: {data['error']}"
-    
-    return f"Removed tag '{tag_name}' from note (ID: {note_id})"
+    response = joplin_request(f"folders/{notebook_id}", query_params=params, method="DELETE")
+    if isinstance(response, dict) and "error" in response:
+        return f"Error: {response['error']}"
 
+    estado = "permanentemente eliminada" if permanent else "eliminada"
+    return f"Libreta {estado} (ID: {notebook_id})."
 
-def list_tags():
-    """Lists all tags in Joplin."""
-    data = joplin_request("tags")
-    if "error" in data:
-        return f"Error: {data['error']}"
-    
-    items = data.get("items", [])
-    if not items:
-        return "No tags found."
-    
-    results = [f"- {item['title']} (ID: {item['id']})" for item in items]
-    return "\n".join(results)
-
-
-# Static declaration of tools for MCP exposure
+# Declaración estática de las herramientas para exponerlas vía MCP
 TOOLS = [
     {
         "name": "search_notes",
@@ -304,134 +197,66 @@ TOOLS = [
     },
     {
         "name": "create_notebook",
-        "description": "Creates a new notebook in Joplin. Optionally specify a parent notebook for nested organisation.",
+        "description": "Creates a new notebook in Joplin.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "name": {"type": "string", "description": "Name of the notebook"},
-                "parent_id": {"type": "string", "description": "Optional parent notebook ID for nested notebooks"}
+                "title": {"type": "string", "description": "Name for the new notebook"}
             },
-            "required": ["name"]
-        }
-    },
-    {
-        "name": "delete_notebook",
-        "description": "Permanently deletes a notebook and all notes within it. Use with caution.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "notebook_id": {"type": "string", "description": "The ID of the notebook to delete"}
-            },
-            "required": ["notebook_id"]
-        }
-    },
-    {
-        "name": "update_notebook",
-        "description": "Renames an existing notebook.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "notebook_id": {"type": "string", "description": "The ID of the notebook"},
-                "new_name": {"type": "string", "description": "New name for the notebook"}
-            },
-            "required": ["notebook_id", "new_name"]
+            "required": ["title"]
         }
     },
     {
         "name": "create_note",
-        "description": "Creates a new note in Joplin with title, body, and optional notebook and tags.",
+        "description": "Creates a new note inside a given notebook.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "title": {"type": "string", "description": "Title of the note"},
-                "body": {"type": "string", "description": "Markdown content of the note"},
-                "notebook_id": {"type": "string", "description": "Optional notebook ID to place the note in"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "Optional list of tags to add"}
+                "title": {"type": "string", "description": "Title for the new note"},
+                "body": {"type": "string", "description": "Markdown content for the note"},
+                "parent_id": {"type": "string", "description": "Notebook ID where the note will be stored"}
             },
-            "required": ["title", "body"]
+            "required": ["title", "body", "parent_id"]
         }
     },
     {
-        "name": "rename_note",
-        "description": "Renames an existing note to a new title.",
+        "name": "update_note",
+        "description": "Updates the title and/or body of an existing note.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note to rename"},
-                "new_title": {"type": "string", "description": "The new title for the note"}
-            },
-            "required": ["note_id", "new_title"]
-        }
-    },
-    {
-        "name": "update_note_content",
-        "description": "Updates the Markdown body content of an existing note.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note to update"},
-                "new_body": {"type": "string", "description": "The new Markdown content"}
-            },
-            "required": ["note_id", "new_body"]
-        }
-    },
-    {
-        "name": "move_note",
-        "description": "Moves a note to a different notebook.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note to move"},
-                "target_notebook_id": {"type": "string", "description": "The ID of the destination notebook"}
-            },
-            "required": ["note_id", "target_notebook_id"]
-        }
-    },
-    {
-        "name": "delete_note",
-        "description": "Permanently deletes a note. Use with caution.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note to delete"}
+                "note_id": {"type": "string", "description": "The note ID in Joplin"},
+                "title": {"type": ["string", "null"], "description": "New title (optional)"},
+                "body": {"type": ["string", "null"], "description": "New Markdown content (optional)"}
             },
             "required": ["note_id"]
         }
     },
     {
-        "name": "add_tags_to_note",
-        "description": "Adds one or more tags to a note. Creates tags if they don't exist.",
+        "name": "delete_note",
+        "description": "Deletes a note by ID (optionally permanent).",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "List of tag names to add"}
+                "note_id": {"type": "string", "description": "The note ID in Joplin"},
+                "permanent": {"type": ["boolean", "null"], "description": "Delete permanently (true) or move to trash (false)."}
             },
-            "required": ["note_id", "tags"]
+            "required": ["note_id"]
         }
     },
     {
-        "name": "remove_tags_from_note",
-        "description": "Removes specified tags from a note.",
+        "name": "delete_notebook",
+        "description": "Deletes a notebook by ID (optionally permanent).",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "note_id": {"type": "string", "description": "The ID of the note"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "List of tag names to remove"}
+                "notebook_id": {"type": "string", "description": "Notebook (folder) ID in Joplin"},
+                "permanent": {"type": ["boolean", "null"], "description": "Delete permanently (true) or move to trash (false)."}
             },
-            "required": ["note_id", "tags"]
-        }
-    },
-    {
-        "name": "list_tags",
-        "description": "Obtains a list of all tags in Joplin.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {}
+            "required": ["notebook_id"]
         }
     }
 ]
-
 
 def handle_request(msg):
     method = msg.get("method")
@@ -448,7 +273,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.8.0"
+                    "version": "2.1.1"
                 }
             }
         }
@@ -470,74 +295,38 @@ def handle_request(msg):
         result_text = ""
         is_error = False
         
-        # Existing tools (v1.4)
         if tool_name == "search_notes":
             result_text = search_notes(args.get("query", ""))
         elif tool_name == "read_note":
             result_text = read_note(args.get("note_id", ""))
         elif tool_name == "list_notebooks":
             result_text = list_notebooks()
-        
-        # Notebook management tools (v1.8)
         elif tool_name == "create_notebook":
-            result_text = create_notebook(
-                args.get("name", ""),
-                args.get("parent_id")
-            )
-        elif tool_name == "delete_notebook":
-            result_text = delete_notebook(args.get("notebook_id", ""))
-        elif tool_name == "update_notebook":
-            result_text = update_notebook(
-                args.get("notebook_id", ""),
-                args.get("new_name", "")
-            )
-        
-        # Note management tools (v1.8) - Specialised operations
+            result_text = create_notebook(args.get("title"))
         elif tool_name == "create_note":
             result_text = create_note(
-                args.get("title", ""),
-                args.get("body", ""),
-                args.get("notebook_id"),
-                args.get("tags", [])
+                args.get("title"),
+                args.get("body"),
+                args.get("parent_id")
             )
-        elif tool_name == "rename_note":
-            result_text = rename_note(
-                args.get("note_id", ""),
-                args.get("new_title", "")
-            )
-        elif tool_name == "update_note_content":
-            result_text = update_note_content(
-                args.get("note_id", ""),
-                args.get("new_body", "")
-            )
-        elif tool_name == "move_note":
-            result_text = move_note(
-                args.get("note_id", ""),
-                args.get("target_notebook_id", "")
+        elif tool_name == "update_note":
+            result_text = update_note(
+                args.get("note_id"),
+                args.get("title"),
+                args.get("body")
             )
         elif tool_name == "delete_note":
-            result_text = delete_note(args.get("note_id", ""))
-        
-        # Tag management tools (v1.8)
-        elif tool_name == "add_tags_to_note":
-            note_id = args.get("note_id", "")
-            tags = args.get("tags", [])
-            results = []
-            for tag in tags:
-                results.append(add_tag_to_note(note_id, tag))
-            result_text = "\n".join(results)
-        elif tool_name == "remove_tags_from_note":
-            note_id = args.get("note_id", "")
-            tags = args.get("tags", [])
-            results = []
-            for tag in tags:
-                results.append(remove_tag_from_note(note_id, tag))
-            result_text = "\n".join(results)
-        elif tool_name == "list_tags":
-            result_text = list_tags()
-        
+            result_text = delete_note(
+                args.get("note_id"),
+                args.get("permanent") in (True, "true", "True", 1)
+            )
+        elif tool_name == "delete_notebook":
+            result_text = delete_notebook(
+                args.get("notebook_id"),
+                args.get("permanent") in (True, "true", "True", 1)
+            )
         else:
-            result_text = f"Unknown tool: {tool_name}"
+            result_text = f"Herramienta desconocida: {tool_name}"
             is_error = True
             
         return {
@@ -554,7 +343,7 @@ def handle_request(msg):
             }
         }
         
-    # Notifications (notifications/initialised, ping, or cancel) don't have an ID requiring direct response
+    # Las notificaciones (como notifications/initialized, ping, o cancel) no tienen un ID que requiera respuesta directa
     if msg_id is not None:
         return {
             "jsonrpc": "2.0",
@@ -566,9 +355,8 @@ def handle_request(msg):
         }
     return None
 
-
 def main():
-    # Infinite loop to receive commands via standard input (stdio)
+    # Bucle infinito para recibir comandos a través de standard input (stdio)
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -583,7 +371,6 @@ def main():
         if response:
             sys.stdout.write(json.dumps(response) + "\n")
             sys.stdout.flush()
-
 
 if __name__ == "__main__":
     main()
