@@ -505,7 +505,7 @@ The following Joplin REST API endpoints are utilised:
 
 ## Version Compatibility
 
-- **Joplin MCP Version:** 1.8.0
+- **Joplin MCP Version:** 1.8.1
 - **MCP Protocol:** 2024-11-05
 - **Joplin Desktop:** 2.13+ (Web Clipper API)
 - **Python:** 3.9+

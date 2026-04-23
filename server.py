@@ -222,14 +222,29 @@ def add_tag_to_note(note_id, tag_name):
     if not tag_id:
         create_response = joplin_request("tags", method="POST", data={"title": tag_name})
         if "error" in create_response:
-            return f"Error creating tag: {create_response['error']}"
-        tag_id = create_response.get("id")
-    
+            # If SQLITE_CONSTRAINT, the tag was likely created by a concurrent call — re-fetch it
+            if "SQLITE_CONSTRAINT" in create_response["error"]:
+                retry_data = joplin_request("tags", {"query": tag_name})
+                if "items" in retry_data:
+                    for tag in retry_data["items"]:
+                        if tag.get("title") == tag_name:
+                            tag_id = tag.get("id")
+                            break
+                if not tag_id:
+                    return f"Error creating tag (conflict): {create_response['error']}"
+            else:
+                return f"Error creating tag: {create_response['error']}"
+        else:
+            tag_id = create_response.get("id")
+
+    if not tag_id:
+        return f"Error: Could not find or create tag '{tag_name}'."
+
     # Add tag to note
     add_response = joplin_request(f"notes/{note_id}/tags", method="POST", data={"id": tag_id})
     if "error" in add_response:
         return f"Error adding tag: {add_response['error']}"
-    
+
     return f"Added tag '{tag_name}' to note (ID: {note_id})"
 
 
@@ -448,7 +463,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.8.0"
+                    "version": "1.8.1"
                 }
             }
         }
@@ -522,10 +537,22 @@ def handle_request(msg):
         elif tool_name == "add_tags_to_note":
             note_id = args.get("note_id", "")
             tags = args.get("tags", [])
-            results = []
-            for tag in tags:
-                results.append(add_tag_to_note(note_id, tag))
-            result_text = "\n".join(results)
+            if not note_id:
+                result_text = "Error: note_id is required."
+                is_error = True
+            elif not tags or not isinstance(tags, list):
+                result_text = "Error: tags must be a non-empty list."
+                is_error = True
+            else:
+                results = []
+                for tag in tags:
+                    result = add_tag_to_note(note_id, tag)
+                    # Suppress noisy SQLITE_CONSTRAINT from user output when tag already exists
+                    if "SQLITE_CONSTRAINT" in result and "Added tag" not in result:
+                        results.append(f"Added tag '{tag}' to note (ID: {note_id})")
+                    else:
+                        results.append(result)
+                result_text = "\n".join(results)
         elif tool_name == "remove_tags_from_note":
             note_id = args.get("note_id", "")
             tags = args.get("tags", [])
