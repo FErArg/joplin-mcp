@@ -457,7 +457,6 @@ Ejecuta el proceso completo de ingestación y reestructuración de notas en WiKi
 |----------------|---------|-------------|--------------------------------------------------|
 | `maxWordCount` | number  | No          | Palabras máximas antes de dividir (defecto 1000) |
 | `chunkSize`    | number  | No          | Tamaño de cada chunk en palabras (defecto 800)   |
-| `concurrency`  | number  | No          | Notas procesadas en paralelo (defecto 3)         |
 | `dryRun`       | boolean | No          | Modo simulación: no escribe cambios (defecto false) |
 
 **Ejemplo de uso:**

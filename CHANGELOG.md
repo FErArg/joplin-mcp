@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tools and 2 custom slash commands in README.md.
 - **Input validation**: `add_tags_to_note` now validates `note_id` and `tags`
   before processing, returning clear errors for missing required fields.
+- **dryRun parameter**: `ingestar_docs` tool now supports `dryRun=true` to
+  simulate the process without writing any changes to Joplin.
+- **Configurable chunking**: `ingestar_docs` now accepts `maxWordCount` and
+  `chunkSize` parameters to control document splitting behaviour.
 
 ### Changed
 - **Project structure**: Updated to document `opencode/` directory with
