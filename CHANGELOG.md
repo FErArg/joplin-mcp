@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-04-24
+
+### Fixed
+- **SQLITE_CONSTRAINT race condition**: Tag creation now handles concurrent
+  unique constraint violations by retrying the search instead of failing
+  (`server.py` — `add_tag_to_note()`).
+
+### Added
+- **OpenCode integration documentation**: Full listing of 18 OpenCode plugin
+  tools and 2 custom slash commands in README.md.
+- **Input validation**: `add_tags_to_note` now validates `note_id` and `tags`
+  before processing, returning clear errors for missing required fields.
+
+### Changed
+- **Project structure**: Updated to document `opencode/` directory with
+  tools/ and commands/ subdirectories.
+
 ## [1.8] - 2025-04-22
 
 ### Changed
@@ -199,7 +216,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8.2...HEAD
+[1.8.2]: https://github.com/ferarg/joplin-mcp/compare/v1.8...v1.8.2
 [1.8]: https://github.com/ferarg/joplin-mcp/compare/v1.5...v1.8
 [1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5
 [1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
