@@ -425,6 +425,23 @@ install_files() {
     # Create version file
     echo "$VERSION" > "$INSTALL_DIR/VERSION"
     
+    # Copy OpenCode tools and commands to config directory
+    if [ -d "$SCRIPT_DIR/opencode/tools" ]; then
+        mkdir -p "$CONFIG_DIR/tools"
+        cp "$SCRIPT_DIR/opencode/tools/"*.ts "$CONFIG_DIR/tools/" 2>/dev/null || true
+        success "OpenCode tools copied to $CONFIG_DIR/tools/"
+    else
+        warning "opencode/tools/ directory not found, skipping"
+    fi
+    
+    if [ -d "$SCRIPT_DIR/opencode/commands" ]; then
+        mkdir -p "$CONFIG_DIR/commands"
+        cp "$SCRIPT_DIR/opencode/commands/"*.md "$CONFIG_DIR/commands/" 2>/dev/null || true
+        success "OpenCode commands copied to $CONFIG_DIR/commands/"
+    else
+        warning "opencode/commands/ directory not found, skipping"
+    fi
+    
     # Verify VERSION file was created correctly
     if [ -f "$INSTALL_DIR/VERSION" ]; then
         installed_version=$(cat "$INSTALL_DIR/VERSION" 2>/dev/null || echo "unknown")
