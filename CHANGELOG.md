@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.4] - 2026-04-24
+
+### Added
+- **install.sh deploys OpenCode plugin files**: The installer now copies
+  `opencode/tools/` (.ts) and `opencode/commands/` (.md) to
+  `~/.config/opencode/` for automatic availability.
+
 ## [1.8.2] - 2026-04-24
 
 ### Fixed
@@ -220,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8.2...HEAD
+[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8.4...HEAD
+[1.8.4]: https://github.com/ferarg/joplin-mcp/compare/v1.8.2...v1.8.4
 [1.8.2]: https://github.com/ferarg/joplin-mcp/compare/v1.8...v1.8.2
 [1.8]: https://github.com/ferarg/joplin-mcp/compare/v1.5...v1.8
 [1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5

@@ -17,7 +17,7 @@ CONFIG_DIR="$HOME/.config/opencode"
 JOPLIN_CONFIG_DIR="$HOME/.config/joplin-desktop"
 LOG_FILE="$INSTALL_DIR/logs/install.log"
 BACKUP_DIR="$INSTALL_DIR/backup/$(date +%Y%m%d_%H%M%S)"
-VERSION="1.8"
+VERSION="1.8.4"
 
 # ============================================================
 # UTILITY FUNCTIONS

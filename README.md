@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.8.2-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.8.4-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
-**v1.8.2 - 14 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
+**v1.8.4 - 14 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
 
 ### MCP Tools (Python server.py)
 
@@ -218,11 +218,10 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 ## Changelog
 
-### v1.8.2 (2026-04-24)
-- **Fixed**: SQLITE_CONSTRAINT race condition in tag creation — retries search on conflict
-- **Added**: OpenCode integration documentation — 18 TS tools + 2 slash commands in README
-- **Added**: Input validation for add_tags_to_note (required fields check)
-- **Enhanced**: Project structure updated to include `opencode/` directory
+### v1.8.4 (2026-04-24)
+- **Added**: `ingestar_docs` now supports `dryRun`, `maxWordCount`, `chunkSize` parameters
+- **Added**: `install.sh` deploys `opencode/tools/` and `opencode/commands/` to `~/.config/opencode/`
+- **Removed**: `concurrency` parameter from `ingestar_docs` (not implemented)
 
 ### v1.8 (2025-04-22)
 - **New**: Specialised note operations (rename, update content, move)
