@@ -9,7 +9,7 @@ Este manual describe todas las herramientas (Custom Tools) disponibles para inte
 1. **Joplin** instalado y con el Web Clipper activo (Settings → Web Clipper → Enable Web Clipper Service).
 2. **Token de API**: Cópialo desde Settings → Web Clipper → Authorization Token.
 3. **Variable de entorno** `JOPLIN_TOKEN` configurada (ver sección de configuración más abajo).
-4. **OpenCode** funcionando con soporte para Custom Tools (archivos `.ts` en `opencode/tools/`).
+4. **OpenCode** funcionando con soporte para Custom Tools (archivos `.ts` en `.opencode/tools/`).
 
 ### Configuración de `JOPLIN_TOKEN`
 
@@ -58,10 +58,10 @@ Según la configuración de la wiki `WiKi_LLM` [1], la libreta raíz tiene el ID
 
 ### 1. Búsqueda y lectura
 
-#### `joplin-search/text`
+#### `joplin_search_text`
 Busca notas por texto en el título o contenido. Devuelve ID, título y un snippet del contenido.
 
-**Export:** `text` en `opencode/tools/joplin-search.ts`
+**Archivo:** `.opencode/tools/joplin-search.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción                     |
 |-----------|--------|-------------|----------------------------------|
@@ -82,10 +82,10 @@ Busca notas por texto en el título o contenido. Devuelve ID, título y un snipp
 
 ---
 
-#### `joplin-search/byTag`
+#### `joplin_search_byTag`
 Busca todas las notas que tienen una etiqueta específica (por ID de etiqueta).
 
-**Export:** `byTag` en `opencode/tools/joplin-search.ts`
+**Archivo:** `.opencode/tools/joplin-search.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción                     |
 |-----------|--------|-------------|----------------------------------|
@@ -107,10 +107,10 @@ Busca todas las notas que tienen una etiqueta específica (por ID de etiqueta).
 
 ---
 
-#### `joplin-search/byNotebook`
+#### `joplin_search_byNotebook`
 Busca notas dentro de una libreta específica (por ID de libreta).
 
-**Export:** `byNotebook` en `opencode/tools/joplin-search.ts`
+**Archivo:** `.opencode/tools/joplin-search.ts`
 
 | Parámetro    | Tipo   | Obligatorio | Descripción                     |
 |--------------|--------|-------------|----------------------------------|
@@ -131,10 +131,10 @@ Busca notas dentro de una libreta específica (por ID de libreta).
 
 ---
 
-#### `joplin-read`
-Lee el contenido completo de una nota a partir de su ID (default export).
+#### `joplin_read`
+Lee el contenido completo de una nota a partir de su ID.
 
-**Archivo:** `opencode/tools/joplin-read.ts`
+**Archivo:** `.opencode/tools/joplin-read.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción           |
 |-----------|--------|-------------|-----------------------|
@@ -142,7 +142,7 @@ Lee el contenido completo de una nota a partir de su ID (default export).
 
 **Ejemplo de uso:**
 
-> *"Usa joplin-read para mostrarme el contenido de la nota con id 'abc123'."*
+> *"Usa joplin_read para mostrarme el contenido de la nota con id 'abc123'."*
 
 **Respuesta esperada:**
 ```
@@ -153,10 +153,10 @@ Contenido en markdown...
 
 ---
 
-#### `joplin-revisar-nota`
-Lee y analiza una nota: muestra título, contenido completo, etiquetas y fecha. Similar a `joplin-read` pero con formato más detallado (default export).
+#### `revisar_nota`
+Lee y analiza una nota: muestra título, contenido completo, etiquetas y fecha. Similar a `joplin_read` pero con formato más detallado.
 
-**Archivo:** `opencode/tools/joplin-revisar-nota.ts`
+**Archivo:** `.opencode/tools/joplin-revisar-nota.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción           |
 |-----------|--------|-------------|-----------------------|
@@ -180,10 +180,10 @@ Lee y analiza una nota: muestra título, contenido completo, etiquetas y fecha. 
 
 ---
 
-#### `joplin-buscar-en-wiki`
-Busca notas en la libreta **WiKi_LLM** (y sublibretas) por texto. Ideal para búsquedas dentro de la wiki (default export).
+#### `buscar_en_wiki`
+Busca notas en la libreta **WiKi_LLM** (y sublibretas) por texto. Ideal para búsquedas dentro de la wiki [1].
 
-**Archivo:** `opencode/tools/joplin-buscar-en-wiki.ts`
+**Archivo:** `.opencode/tools/joplin-buscar-en-wiki.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción                     |
 |-----------|--------|-------------|----------------------------------|
@@ -206,10 +206,10 @@ Busca notas en la libreta **WiKi_LLM** (y sublibretas) por texto. Ideal para bú
 
 ### 2. Libretas
 
-#### `joplin-notebooks`
-Lista todas las libretas disponibles (default export).
+#### `joplin_notebooks`
+Lista todas las libretas disponibles.
 
-**Archivo:** `opencode/tools/joplin-notebooks.ts`
+**Archivo:** `.opencode/tools/joplin-notebooks.ts`
 
 *Sin parámetros.*
 
@@ -227,10 +227,10 @@ Lista todas las libretas disponibles (default export).
 
 ---
 
-#### `joplin-notes-in`
-Obtiene todas las notas de una libreta específica (solo títulos e IDs, default export).
+#### `joplin_notes_in`
+Obtiene todas las notas de una libreta específica (solo títulos e IDs).
 
-**Archivo:** `opencode/tools/joplin-notes-in.ts`
+**Archivo:** `.opencode/tools/joplin-notes-in.ts`
 
 | Parámetro    | Tipo   | Obligatorio | Descripción               |
 |--------------|--------|-------------|---------------------------|
@@ -252,10 +252,10 @@ Obtiene todas las notas de una libreta específica (solo títulos e IDs, default
 
 ### 3. CRUD de notas
 
-#### `joplin-notes/create`
+#### `joplin_notes_create`
 Crea una nueva nota en Joplin. Opcionalmente puedes asignarla a una libreta.
 
-**Export:** `create` en `opencode/tools/joplin-notes.ts`
+**Archivo:** `.opencode/tools/joplin-notes.ts`
 
 | Parámetro    | Tipo   | Obligatorio | Descripción                  |
 |--------------|--------|-------------|------------------------------|
@@ -274,10 +274,10 @@ Crea una nueva nota en Joplin. Opcionalmente puedes asignarla a una libreta.
 
 ---
 
-#### `joplin-notes/update`
+#### `joplin_notes_update`
 Actualiza el título y/o cuerpo de una nota existente.
 
-**Export:** `update` en `opencode/tools/joplin-notes.ts`
+**Archivo:** `.opencode/tools/joplin-notes.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción               |
 |-----------|--------|-------------|---------------------------|
@@ -296,10 +296,10 @@ Actualiza el título y/o cuerpo de una nota existente.
 
 ---
 
-#### `joplin-notes/deleteNote`
+#### `joplin_notes_deleteNote`
 Elimina una nota permanentemente.
 
-**Export:** `deleteNote` en `opencode/tools/joplin-notes.ts`
+**Archivo:** `.opencode/tools/joplin-notes.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción              |
 |-----------|--------|-------------|--------------------------|
@@ -318,10 +318,10 @@ Nota abc123 eliminada correctamente.
 
 ### 4. Etiquetas
 
-#### `joplin-tags/list`
+#### `joplin_tags_list`
 Lista todas las etiquetas con su ID y título.
 
-**Export:** `list` en `opencode/tools/joplin-tags.ts`
+**Archivo:** `.opencode/tools/joplin-tags.ts`
 
 *Sin parámetros.*
 
@@ -339,10 +339,10 @@ Lista todas las etiquetas con su ID y título.
 
 ---
 
-#### `joplin-tags/create`
+#### `joplin_tags_create`
 Crea una nueva etiqueta.
 
-**Export:** `create` en `opencode/tools/joplin-tags.ts`
+**Archivo:** `.opencode/tools/joplin-tags.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción              |
 |-----------|--------|-------------|--------------------------|
@@ -359,10 +359,10 @@ Crea una nueva etiqueta.
 
 ---
 
-#### `joplin-tags/deleteTag`
+#### `joplin_tags_deleteTag`
 Elimina una etiqueta por su ID.
 
-**Export:** `deleteTag` en `opencode/tools/joplin-tags.ts`
+**Archivo:** `.opencode/tools/joplin-tags.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción                    |
 |-----------|--------|-------------|--------------------------------|
@@ -381,10 +381,10 @@ Etiqueta tag1 eliminada correctamente.
 
 ### 5. Asignación de etiquetas a notas
 
-#### `joplin-tag-note/add`
+#### `joplin_tag_note_add`
 Asigna una etiqueta existente a una nota existente.
 
-**Export:** `add` en `opencode/tools/joplin-tag-note.ts`
+**Archivo:** `.opencode/tools/joplin-tag-note.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción              |
 |-----------|--------|-------------|--------------------------|
@@ -402,10 +402,10 @@ Etiqueta tag1 asignada a nota n1.
 
 ---
 
-#### `joplin-tag-note/remove`
+#### `joplin_tag_note_remove`
 Desasigna una etiqueta de una nota.
 
-**Export:** `remove` en `opencode/tools/joplin-tag-note.ts`
+**Archivo:** `.opencode/tools/joplin-tag-note.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción              |
 |-----------|--------|-------------|--------------------------|
@@ -423,10 +423,10 @@ Etiqueta tag1 desasignada de nota n1.
 
 ---
 
-#### `joplin-tag-note/listTagsOfNote`
+#### `joplin_tag_note_listTagsOfNote`
 Obtiene todas las etiquetas asignadas a una nota.
 
-**Export:** `listTagsOfNote` en `opencode/tools/joplin-tag-note.ts`
+**Archivo:** `.opencode/tools/joplin-tag-note.ts`
 
 | Parámetro | Tipo   | Obligatorio | Descripción        |
 |-----------|--------|-------------|--------------------|
@@ -448,18 +448,25 @@ Obtiene todas las etiquetas asignadas a una nota.
 
 ### 6. Procesos automatizados
 
-#### `joplin-ingestar-docs`
-Ejecuta el proceso completo de ingestación y reestructuración de notas en WiKi_LLM/Documentación. Lee notas no procesadas, las divide si superan las 1000 palabras, asigna metadatos y etiquetas, actualiza el Index y Logs (default export).
+#### `ingestar_docs`
+Ejecuta el proceso completo de ingestación y reestructuración de notas en WiKi_LLM/Documentación. Lee notas no procesadas, las divide si superan las 1000 palabras, asigna metadatos y etiquetas, actualiza el Index y Logs [1].
 
-**Archivo:** `opencode/tools/joplin-ingestar-docs.ts`
+**Archivo:** `.opencode/tools/joplin-ingestar-docs.ts`
 
-*Sin parámetros.*
+| Parámetro      | Tipo    | Obligatorio | Descripción                                      |
+|----------------|---------|-------------|--------------------------------------------------|
+| `maxWordCount` | number  | No          | Palabras máximas antes de dividir (defecto 1000) |
+| `chunkSize`    | number  | No          | Tamaño de cada chunk en palabras (defecto 800)   |
+| `concurrency`  | number  | No          | Notas procesadas en paralelo (defecto 3)         |
+| `dryRun`       | boolean | No          | Modo simulación: no escribe cambios (defecto false) |
 
 **Ejemplo de uso:**
 
 > *"Ejecuta la ingestación de documentos."*
 
-**Respuesta esperada:**
+> *"Ejecuta ingestar_docs con dryRun=true para ver qué haría."*
+
+**Respuesta esperada (dryRun):**
 ```
 ## Resumen de ingestación
 - Total notas encontradas: 45
@@ -467,4 +474,42 @@ Ejecuta el proceso completo de ingestación y reestructuración de notas en WiKi
 - Notas procesadas: 33
 - Notas hijas creadas: 0
 - Errores: 0
+
+*Modo simulación: no se escribieron cambios.*
+```
+
+---
+
+#### `enlazar_padres_hijas`
+Escanea todas las notas de una libreta (o de toda la wiki) y enlaza padres con hijas mediante etiquetas:
+- En cada **nota hija** (con `parent_id`) añade la etiqueta `padre:{idDelPadre}`.
+- En cada **nota padre** (con hijas) añade la etiqueta `hijas:{id1,id2,...}`.
+
+**Archivo:** `.opencode/tools/enlazar-padres-hijas.ts`
+
+| Parámetro   | Tipo    | Obligatorio | Descripción                                      |
+|-------------|---------|-------------|--------------------------------------------------|
+| `folderId`  | string  | No          | ID de la libreta raíz (defecto: WiKi_LLM)        |
+| `tagPrefix` | string  | No          | Prefijo opcional para etiquetas (ej. `v1-`)      |
+| `dryRun`    | boolean | No          | Modo simulación (defecto false)                  |
+
+**Ejemplo de uso:**
+
+> *"Ejecuta el enlace de padres e hijas en toda la wiki."*
+
+> *"Usa enlazar_padres_hijas con dryRun=true."*
+
+**Respuesta esperada (dryRun):**
+```
+## Resumen de enlace padre-hija
+- Total de notas escaneadas: 150
+- Notas con parent_id (hijas): 23
+- Notas padre con hijas: 12
+
+Relaciones encontradas:
+  Padre: Index (9184a850...) → 3 hijas
+    Hija: Nota sobre RAG (abc123)
+    Hija: Guía de uso (def456)
+    ...
+*Modo simulación: no se escribieron cambios.*
 ```
