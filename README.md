@@ -94,178 +94,53 @@ cd joplin-mcp
 
 The automatic installer will detect your Joplin token, configure the environment, and validate the installation. For more options and manual configuration, consult [INSTALL.md](INSTALL.md).
 
-## Available Tools
+## Quick Reference
 
-### search_notes
+| Category | Tool | Description |
+|----------|------|-------------|
+| **Read** | `search_notes(query)` | Search notes by keyword |
+| | `read_note(note_id)` | Read full Markdown content |
+| | `list_notebooks()` | List all notebooks |
+| | `list_tags()` | List all tags |
+| **Notebooks** | `create_notebook(name, parent_id?)` | Create notebook |
+| | `update_notebook(id, new_name)` | Rename notebook |
+| | `delete_notebook(id, permanent?)` | Delete (soft or permanent) |
+| **Notes** | `create_note(title, body, notebook_id?, tags?)` | Create note |
+| | `rename_note(id, new_title)` | Rename note |
+| | `update_note(id, title?, body?)` | Update title/body |
+| | `update_note_content(id, new_body)` | Update body only |
+| | `move_note(id, target_notebook_id)` | Move to notebook |
+| | `delete_note(id, permanent?)` | Delete (soft or permanent) |
+| **Tags** | `add_tags_to_note(id, tags[])` | Add tags (auto-creates) |
+| | `remove_tags_from_note(id, tags[])` | Remove tags |
 
-Search for notes by keyword.
-
-**Input**: `{"query": "search term"}`
-
-**Example**:
-```
-⚙ joplin_search_notes [query="AI"]
-Result:
-- Machine Learning Notes (ID: abc123)
-- AI Research Paper (ID: def456)
-```
-
-### read_note
-
-Read the full content of a specific note.
-
-**Input**: `{"note_id": "note-id-here"}`
-
-**Example**:
-```
-⚙ joplin_read_note [note_id="abc123"]
-Result:
-# Machine Learning Notes
-
-This is the markdown content of the note...
-```
-
-### list_notebooks
-
-List all notebooks/folders in Joplin.
-
-**Example**:
-```
-⚙ joplin_list_notebooks
-Result:
-- Work (ID: folder-abc)
-- Personal (ID: folder-def)
-- Research (ID: folder-ghi)
-```
+For complete tool documentation and usage examples, see [agents/joplin-mcp.md](agents/joplin-mcp.md).
 
 ## Troubleshooting
 
-### Error 403: Authentication failed
-
 ```bash
-# Verify that the token works
-curl "http://localhost:41184/notes?token=YOUR_TOKEN&limit=1"
-
-# If it fails, reinstall with new token
-./install.sh
-```
-
-### Error: Joplin server not available
-
-```bash
-# Verify that Joplin responds
-~/.joplin-mcp/joplin-mcp-doctor.sh
-
-# Ensure that:
-# 1. Joplin desktop is running
-# 2. Web Clipper is enabled (Options > Web Clipper > Enable)
-# 3. Port 41184 is available
-```
-
-### Error: MCP server not responding
-
-```bash
-# Verify installation
-~/.joplin-mcp/joplin-mcp-doctor.sh
-
-# View logs
-cat ~/.joplin-mcp/logs/install.log
-
-# Reinstall if necessary
-./install.sh
-```
-
-### Recover backup
-
-If something goes wrong, you can restore the backup:
-
-```bash
-# View available backups
-ls -la ~/.joplin-mcp/backup/
-
-# Restore opencode configuration
-cp ~/.joplin-mcp/backup/20250121_143022/opencode.json.backup ~/.config/opencode/opencode.json
-
-# Or restore everything
-rm -rf ~/.joplin-mcp
-cp -r ~/.joplin-mcp-backup-20250121_143022 ~/.joplin-mcp
+~/.joplin-mcp/joplin-mcp-doctor.sh  # Full diagnostics
+cat ~/.joplin-mcp/logs/install.log  # Installation logs
 ```
 
 ## Development
 
-### Project Structure
-
 ```
 joplin-mcp/
-├── install.sh              # Main installer
-├── uninstall.sh            # Uninstaller
-├── joplin-mcp-doctor.sh    # Diagnostic script
-├── run_mcp.sh              # Wrapper template
-├── server.py               # MCP server (Python)
-├── requirements.txt        # Python dependencies
-├── mcp_config.json         # Example for Claude Desktop
-├── opencode/               # OpenCode plugin integration
-│   ├── tools/              # 10 TypeScript tool files (18 exports)
-│   └── commands/           # 2 custom slash commands (Spanish)
-├── CHANGELOG.md            # Change history
-└── README.md               # This file
-```
-
-### Testing
-
-```bash
-# Manual server test
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' | ~/.joplin-mcp/run_mcp.sh
-
-# Full diagnostic
-~/.joplin-mcp/joplin-mcp-doctor.sh
+├── server.py              # MCP server (Python)
+├── install.sh            # Installer
+├── joplin-mcp-doctor.sh   # Diagnostics
+├── opencode/
+│   ├── tools/             # TypeScript plugin tools
+│   └── commands/          # Custom slash commands
+└── agents/
+    └── joplin-mcp.md      # AI Agent Handbook
 ```
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
-## Security Notes
-
-- **Never commit your Joplin token to git**
-- The installer saves the token in `~/.joplin-mcp/run_mcp.sh` (accessible only by your user)
-- The repository only contains placeholders (`TOKEN_JOPLIN`)
-- Backups are saved in `~/.joplin-mcp/backup/` (check permissions)
-
 ## License
 
-**GPL v3 License** - See [LICENSE](LICENSE) file for details
-
-This project is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-## Project Attribution
-
-This project is built on the following technologies:
-
-- **[JoplinApp](https://joplinapp.org/)** - The open source note-taking application
-- **[OpenCode](https://github.com/anomalyco/opencode)** - AI-powered code development framework
-- **[MCP Protocol](https://modelcontextprotocol.io/)** - Model Context Protocol version 2024-11-05
-
-## Acknowledgments
-
-This project was developed with the assistance of:
-
-- **[DeepSeek](https://www.deepseek.com/)** - AI model used for code development, architecture design, and documentation
-- **[Kimi](https://kimi.moonshot.cn/)** - AI model used for code review, optimisation, and testing
-
-Special thanks to the open-source AI community for making tools like these accessible to developers.
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-1. No tokens or sensitive data in commits
-2. Follow existing code style
-3. Update README.md if adding features
-4. Test with `./joplin-mcp-doctor.sh`
-
-## Support
-
-For issues or questions:
-1. Run `~/.joplin-mcp/joplin-mcp-doctor.sh` for diagnostics
-2. Check logs: `~/.joplin-mcp/logs/install.log`
-3. Open an issue on GitHub
+**GPL v3** - See [LICENSE](LICENSE) for details.
