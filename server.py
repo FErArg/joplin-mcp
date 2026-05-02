@@ -25,7 +25,7 @@ def joplin_request(endpoint, query_params=None, method="GET", data=None):
     if method == "GET":
         sys.stderr.write(f"DEBUG: GET {BASE_URL}/{endpoint}\n")
     else:
-        sys.stderr.write(f"DEBUG: {method} {BASE_URL}/{endpoint}\n")
+        sys.stderr.write(f"DEBUG: {method} {BASE_URL}/{endpoint} [token masked]\n")
     
     try:
         headers = {"Content-Type": "application/json"}
@@ -463,7 +463,7 @@ def handle_request(msg):
                 },
                 "serverInfo": {
                     "name": "joplin_mcp_raw",
-                    "version": "1.8.4"
+                    "version": "1.8.5"
                 }
             }
         }
@@ -485,7 +485,7 @@ def handle_request(msg):
         result_text = ""
         is_error = False
         
-        # Existing tools (v1.4)
+        # Existing tools (v1.8.4)
         if tool_name == "search_notes":
             result_text = search_notes(args.get("query", ""))
         elif tool_name == "read_note":
@@ -493,7 +493,7 @@ def handle_request(msg):
         elif tool_name == "list_notebooks":
             result_text = list_notebooks()
         
-        # Notebook management tools (v1.8)
+        # Notebook management tools (v1.8.4)
         elif tool_name == "create_notebook":
             result_text = create_notebook(
                 args.get("name", ""),
@@ -507,7 +507,7 @@ def handle_request(msg):
                 args.get("new_name", "")
             )
         
-        # Note management tools (v1.8) - Specialised operations
+        # Note management tools (v1.8.4) - Specialised operations
         elif tool_name == "create_note":
             result_text = create_note(
                 args.get("title", ""),
@@ -533,7 +533,7 @@ def handle_request(msg):
         elif tool_name == "delete_note":
             result_text = delete_note(args.get("note_id", ""))
         
-        # Tag management tools (v1.8)
+        # Tag management tools (v1.8.4)
         elif tool_name == "add_tags_to_note":
             note_id = args.get("note_id", "")
             tags = args.get("tags", [])

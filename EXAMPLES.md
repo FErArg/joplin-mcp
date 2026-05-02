@@ -1,6 +1,6 @@
 # Examples
 
-Practical examples for using Joplin MCP v1.5 with OpenCode and other MCP clients.
+Practical examples for using Joplin MCP v1.8.5 with OpenCode and other MCP clients.
 
 ## Table of Contents
 

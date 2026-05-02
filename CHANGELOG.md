@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.5] - 2026-05-02
+
+### Security
+- **DEBUG log mask**: Token is now masked (`[token masked]`) in debug logs to prevent accidental token exposure
+
 ## [1.8.4] - 2026-04-24
 
 ### Added
@@ -227,13 +232,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/ferarg/joplin-mcp/compare/v1.8.4...HEAD
-[1.8.4]: https://github.com/ferarg/joplin-mcp/compare/v1.8.2...v1.8.4
-[1.8.2]: https://github.com/ferarg/joplin-mcp/compare/v1.8...v1.8.2
-[1.8]: https://github.com/ferarg/joplin-mcp/compare/v1.5...v1.8
-[1.5]: https://github.com/ferarg/joplin-mcp/compare/v1.4...v1.5
-[1.4]: https://github.com/ferarg/joplin-mcp/compare/v1.3...v1.4
-[1.3]: https://github.com/ferarg/joplin-mcp/compare/v1.2...v1.3
-[1.2]: https://github.com/ferarg/joplin-mcp/compare/v1.1...v1.2
-[1.1]: https://github.com/ferarg/joplin-mcp/compare/v1.0...v1.1
-[1.0]: https://github.com/ferarg/joplin-mcp/releases/tag/v1.0
+[Unreleased]: https://github.com/FErArg/joplin-mcp/compare/v1.8.5...HEAD
+[1.8.5]: https://github.com/FErArg/joplin-mcp/compare/v1.8.4...v1.8.5
+[1.8.4]: https://github.com/FErArg/joplin-mcp/compare/v1.8.2...v1.8.4
+[1.8.2]: https://github.com/FErArg/joplin-mcp/compare/v1.8...v1.8.2
+[1.8]: https://github.com/FErArg/joplin-mcp/compare/v1.5...v1.8
+[1.5]: https://github.com/FErArg/joplin-mcp/compare/v1.4...v1.5
+[1.4]: https://github.com/FErArg/joplin-mcp/compare/v1.3...v1.4
+[1.3]: https://github.com/FErArg/joplin-mcp/compare/v1.2...v1.3
+[1.2]: https://github.com/FErArg/joplin-mcp/compare/v1.1...v1.2
+[1.1]: https://github.com/FErArg/joplin-mcp/compare/v1.0...v1.1
+[1.0]: https://github.com/FErArg/joplin-mcp/releases/tag/v1.0

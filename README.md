@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.8.4-blue.svg)](https://github.com/ferarg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-1.8.5-blue.svg)](https://github.com/FErArg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
-**v1.8.4 - 14 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
+**v1.8.5 - 14 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
 
 ### MCP Tools (Python server.py)
 
@@ -23,7 +23,7 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 - **update_notebook**: Rename existing notebooks
 - **delete_notebook**: Permanently delete notebooks
 
-#### Note Management (Specialised in v1.8)
+#### Note Management (Specialised in v1.8.4)
 - **create_note**: Create notes with title, body, and optional tags
 - **rename_note**: Explicitly rename notes with validation
 - **update_note_content**: Update Markdown body content only
@@ -82,7 +82,7 @@ Custom slash commands for recurring tasks:
 ### Quick Installation
 
 ```bash
-git clone https://github.com/ferarg/joplin-mcp.git
+git clone https://github.com/FErArg/joplin-mcp.git
 cd joplin-mcp
 ./install.sh
 ```
@@ -218,59 +218,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 
 ## Changelog
 
-### v1.8.4 (2026-04-24)
-- **Added**: `ingestar_docs` now supports `dryRun`, `maxWordCount`, `chunkSize` parameters
-- **Added**: `install.sh` deploys `opencode/tools/` and `opencode/commands/` to `~/.config/opencode/`
-- **Removed**: `concurrency` parameter from `ingestar_docs` (not implemented)
-
-### v1.8 (2025-04-22)
-- **New**: Specialised note operations (rename, update content, move)
-- **Improved**: Input validation for all note operations
-- **Changed**: Replaced generic update_note with 3 specific tools
-- **Enhanced**: 14 MCP tools with clear single-purpose functions
-
-### v1.5 (2025-04-21)
-- **Major**: Full CRUD operations for notebooks and notes
-- **New**: Create, update, delete notebooks (e.g., "WiKi_LLM")
-- **New**: Create, update, delete notes with Markdown support
-- **New**: Tag management (add, remove, list tags)
-- **Enhanced**: 12 MCP tools (from 3 in v1.4)
-- **Improved**: Better error handling and API coverage
-
-### v1.4 (2025-04-21)
-- Converted to Linux-only MCP server
-- Removed macOS and Windows compatibility code
-- Updated OS detection to Linux-only
-
-### v1.3 (2025-04-21)
-- Complete translation to British English
-- Added project attribution (JoplinApp, OpenCode, MCP Protocol)
-- Updated all version references to 1.3
-- Security verification: no personal information leaks
-
-### v1.2 (2025-04-21)
-- Fixed installation menu logic
-- Fixed backup self-copy error
-- Updated all version references to 1.2
-
-### v1.1 (2025-04-21)
-- **New**: Automatic installer (`install.sh`)
-- **New**: Uninstaller (`uninstall.sh`)
-- **New**: Diagnostic script (`joplin-mcp-doctor.sh`)
-- **New**: Automatic token detection from Joplin settings
-- **New**: Token validation during installation
-- **New**: Post-installation tests
-- **New**: Automatic configuration backup
-- **New**: Logging system
-- **Improvement**: Idempotency on reinstallations
-- **Improvement**: Error handling and recovery
-
-### v1.0 (2025-04-21)
-- Initial stable release
-- search_notes, read_note, list_notebooks tools
-- Wrapper script support for OpenCode
-- Environment variable configuration
-- MCP protocol implementation
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ## Security Notes
 

@@ -1,6 +1,6 @@
 # API Reference
 
-Complete reference for all MCP tools available in Joplin MCP v1.8.
+Complete reference for all MCP tools available in Joplin MCP v1.8.5.
 
 ## Overview
 
@@ -9,7 +9,7 @@ Joplin MCP provides **14 tools** for managing your Joplin notes through the Mode
 - **4 Read-Only Tools**: Search and read notes, notebooks, and tags
 - **10 Write Tools**: Create, update, rename, move, and delete notebooks, notes, and tags
 
-**v1.8 Update**: Note operations are now specialised into separate tools for clarity and precision.
+**v1.8.5 Update**: Note operations are now specialised into separate tools for clarity and precision.
 
 ---
 
@@ -509,7 +509,7 @@ The following Joplin REST API endpoints are utilised:
 - **MCP Protocol:** 2024-11-05
 - **Joplin Desktop:** 2.13+ (Web Clipper API)
 - **Python:** 3.9+
-- **Operating System:** Linux only (from v1.4)
+- **Operating System:** Linux only (from v1.8.5)
 
 ---
 
