@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-05-02
+
+### Added
+- **Multi-OS Support**: Linux + macOS compatibility
+  - OS detection: `linux-gnu*` and `darwin*`
+  - Joplin path detection for both platforms
+  - BSD-compatible commands for macOS (netstat, lsof, ps)
+
+### Changed
+- **15 MCP Tools** (from 14): Added `update_note(note_id, title?, body?)` for flexible note updates
+- **permanent flag**: Added to `delete_note` and `delete_notebook` for permanent deletion
+- **Input Validation**: Enhanced validation across all functions
+- **Config Key**: Changed from `joplin` to `joplin_mcp` for OpenCode configuration
+- **DEBUG Log**: Shows token length only (security improvement)
+
+### Technical
+- **server.py**: Base from macOS fork v2.2.0 with robustness improvements
+- **install.sh**: Multi-OS detection, BSD-compatible commands, better error handling
+- **joplin-mcp-doctor.sh**: OS-aware diagnostic checks
+
+### Security
+- **Token Protection**: DEBUG logs only show token length, never the token itself
+
 ## [1.8.5] - 2026-05-02
 
 ### Security
@@ -232,7 +255,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User configures token locally in wrapper script
 - No sensitive data in git history
 
-[Unreleased]: https://github.com/FErArg/joplin-mcp/compare/v1.8.5...HEAD
+[Unreleased]: https://github.com/FErArg/joplin-mcp/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/FErArg/joplin-mcp/compare/v1.8.5...v2.0.0
 [1.8.5]: https://github.com/FErArg/joplin-mcp/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/FErArg/joplin-mcp/compare/v1.8.2...v1.8.4
 [1.8.2]: https://github.com/FErArg/joplin-mcp/compare/v1.8...v1.8.2

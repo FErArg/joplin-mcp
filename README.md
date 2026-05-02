@@ -1,6 +1,6 @@
 # Joplin MCP Server
 
-[![Version](https://img.shields.io/badge/version-1.8.5-blue.svg)](https://github.com/FErArg/joplin-mcp/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/FErArg/joplin-mcp/releases)
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-blue.svg)](LICENSE)
 
@@ -8,7 +8,11 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 
 ## Features
 
-**v1.8.5 - 14 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
+**v2.0.0 - 15 MCP Tools + 18 OpenCode Tools for Complete Joplin Management:**
+
+### Supported Operating Systems
+- **Linux** (Ubuntu, Debian, Fedora, etc.)
+- **macOS** (OS X 10.9+)
 
 ### MCP Tools (Python server.py)
 
@@ -21,14 +25,15 @@ A Model Context Protocol (MCP) server for interacting with Joplin notes.
 #### Notebook Management
 - **create_notebook**: Create new notebooks with optional nesting
 - **update_notebook**: Rename existing notebooks
-- **delete_notebook**: Permanently delete notebooks
+- **delete_notebook**: Delete notebooks (soft or permanent)
 
-#### Note Management (Specialised in v1.8.4)
+#### Note Management
 - **create_note**: Create notes with title, body, and optional tags
 - **rename_note**: Explicitly rename notes with validation
+- **update_note**: Update note title and/or body content
 - **update_note_content**: Update Markdown body content only
 - **move_note**: Move notes between notebooks with validation
-- **delete_note**: Permanently delete individual notes
+- **delete_note**: Delete individual notes (soft or permanent)
 
 #### Tag Management
 - **add_tags_to_note**: Add tags to notes (creates if non-existent)

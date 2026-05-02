@@ -32,6 +32,11 @@ Before installing, ensure you have:
   3. Enable **"Enable Web Clipper"**
   4. Optionally, copy the token (the installer can detect it automatically)
 
+- **macOS**: Install Xcode Command Line Tools:
+  ```bash
+  xcode-select --install
+  ```
+
 - **System dependencies** (normally already installed):
   - `curl` - for validating the connection with Joplin
   - `git` - for cloning the repository
@@ -56,12 +61,14 @@ cd joplin-mcp
 The `install.sh` installer automates the entire process:
 
 1. **System verification**
-   - Detects Linux operating system (Linux-only support)
+   - Detects operating system (Linux or macOS)
    - Verifies you have Python 3.9+ installed
    - Checks dependencies (pip, curl)
 
 2. **Joplin token detection**
-   - Automatically searches for your token in `~/.config/joplin-desktop/settings.json`
+   - Automatically searches for your token:
+     - Linux: `~/.config/joplin-desktop/settings.json`
+     - macOS: `~/Library/Application Support/Joplin/settings.json`
    - If not found, prompts you for it interactively
    - Validates that the token works before continuing
 
@@ -151,11 +158,11 @@ Edit the file `~/.config/opencode/opencode.json`:
 # Create the directory if it doesn't exist
 mkdir -p ~/.config/opencode
 
-# Add configuration (if the file already exists, add only the mcp.joplin section)
+# Add configuration (if the file already exists, add only the mcp.joplin_mcp section)
 cat >> ~/.config/opencode/opencode.json << 'EOF'
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
@@ -187,7 +194,7 @@ The installer automatically configures `~/.config/opencode/opencode.json`:
 ```json
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["/home/YOUR_USER/.joplin-mcp/run_mcp.sh"],
       "enabled": true
@@ -202,7 +209,7 @@ If you need to configure it manually:
 # Add to ~/.config/opencode/opencode.json
 {
   "mcp": {
-    "joplin": {
+    "joplin_mcp": {
       "type": "local",
       "command": ["~/.joplin-mcp/run_mcp.sh"],
       "enabled": true
